@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Europe/Warsaw",
+  "platformAutomerge": false,
+  "rangeStrategy": "bump",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The CircleCI gallery image must match @playwright/test (the screenshot baselines are made in it)",
+      "managerFilePatterns": ["/^\\.circleci/config\\.yml$/"],
+      "matchStrings": ["mcr\\.microsoft\\.com/playwright:v(?<currentValue>\\d+\\.\\d+\\.\\d+)-noble"],
+      "depNameTemplate": "@playwright/test",
+      "datasourceTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "groupName": "react",
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom", "react-router"]
+    },
+    {
+      "groupName": "tanstack",
+      "matchPackageNames": ["@tanstack/**"]
+    },
+    {
+      "groupName": "vite and vitest",
+      "matchPackageNames": ["vite", "@vitejs/**", "vitest", "@vitest/**"]
+    },
+    {
+      "groupName": "eslint",
+      "matchPackageNames": ["eslint", "@eslint/**", "typescript-eslint", "eslint-plugin-*", "globals"]
+    },
+    {
+      "groupName": "playwright",
+      "matchPackageNames": ["@playwright/test", "@axe-core/playwright"]
+    },
+    {
+      "description": "Only patch updates of dev dependencies merge themselves, after green CI and 3 days on npm",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "minimumReleaseAge": "3 days",
+      "automerge": true
+    },
+    {
+      "description": "The gallery image moves only with @playwright/test (the regex manager above)",
+      "matchManagers": ["circleci"],
+      "matchPackageNames": ["mcr.microsoft.com/playwright"],
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+/*
+ * The app's look in one place: colours, radius, shadows, font and type scale. docs/DESIGN.md says when to use each.
+ *
+ * Change the brand: edit --primary, --ring and the hue (255) of the neutrals in both blocks, then check contrast
+ * (docs/DESIGN.md "Changing the brand"). Or paste a theme exported from https://tweakcn.com over the :root and .dark
+ * blocks; tweakcn uses the same names. Keep --success, --warning, --info, --destructive-foreground (tweakcn
+ * has none of them) and the @theme block at the end. Do not paste tweakcn's own @theme block: src/index.css maps
+ * the tokens.
+ */
+
+:root {
+  --radius: 0.5rem;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Surfaces, lowest to highest: the sidebar and the page sit below cards; popovers float above them. */
+  --background: oklch(0.975 0.004 255);
+  --foreground: oklch(0.22 0.02 260);
+  --sidebar: oklch(0.95 0.008 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 260);
+
+  /* Brand: a calm blue for primary actions, links, the active item and focus. */
+  --primary: oklch(0.52 0.15 257);
+  --primary-foreground: oklch(0.99 0.004 255);
+  --ring: oklch(0.56 0.15 257);
+
+  --secondary: oklch(0.95 0.008 255);
+  --secondary-foreground: oklch(0.26 0.025 260);
+  --muted: oklch(0.955 0.006 255);
+  --muted-foreground: oklch(0.49 0.02 258);
+  --accent: oklch(0.94 0.018 255);
+  --accent-foreground: oklch(0.26 0.03 260);
+  --border: oklch(0.91 0.008 255);
+  --input: oklch(0.86 0.01 255);
+
+  /* Status: each colour is readable as text on a card and as a fill under its -foreground. */
+  --destructive: oklch(0.52 0.2 27);
+  --destructive-foreground: oklch(0.99 0.004 27);
+  --success: oklch(0.49 0.12 155);
+  --success-foreground: oklch(0.99 0.01 155);
+  --warning: oklch(0.51 0.12 65);
+  --warning-foreground: oklch(0.99 0.01 65);
+  --info: oklch(0.5 0.12 240);
+  --info-foreground: oklch(0.99 0.01 240);
+
+  --chart-1: oklch(0.52 0.15 257);
+  --chart-2: oklch(0.6 0.12 185);
+  --chart-3: oklch(0.65 0.13 75);
+  --chart-4: oklch(0.55 0.15 305);
+  --chart-5: oklch(0.6 0.15 20);
+
+  --sidebar-foreground: oklch(0.22 0.02 260);
+  --sidebar-primary: oklch(0.52 0.15 257);
+  --sidebar-primary-foreground: oklch(0.99 0.004 255);
+  --sidebar-accent: oklch(0.92 0.02 255);
+  --sidebar-accent-foreground: oklch(0.22 0.03 260);
+  --sidebar-border: oklch(0.9 0.008 255);
+  --sidebar-ring: oklch(0.56 0.15 257);
+
+  /* Elevation: xs-sm give resting surfaces a hairline lift; md-lg are for layers that float (menus, dialogs). */
+  --shadow-2xs: 0 1px 0 oklch(0.3 0.02 260 / 0.04);
+  --shadow-xs: 0 1px 2px oklch(0.3 0.02 260 / 0.05);
+  --shadow-sm: 0 1px 2px oklch(0.3 0.02 260 / 0.05), 0 1px 3px oklch(0.3 0.02 260 / 0.04);
+  --shadow: 0 1px 3px oklch(0.3 0.02 260 / 0.08), 0 1px 2px oklch(0.3 0.02 260 / 0.05);
+  --shadow-md: 0 4px 12px -2px oklch(0.3 0.02 260 / 0.1), 0 2px 4px -2px oklch(0.3 0.02 260 / 0.06);
+  --shadow-lg: 0 12px 28px -6px oklch(0.3 0.02 260 / 0.14), 0 4px 8px -4px oklch(0.3 0.02 260 / 0.08);
+  --shadow-xl: 0 20px 40px -8px oklch(0.3 0.02 260 / 0.18), 0 8px 16px -8px oklch(0.3 0.02 260 / 0.1);
+  --shadow-2xl: 0 28px 56px -12px oklch(0.3 0.02 260 / 0.25);
+}
+
+.dark {
+  /* Tinted greys, never black; a raised surface is lighter than the one below it. */
+  --background: oklch(0.185 0.012 258);
+  --foreground: oklch(0.95 0.005 255);
+  --sidebar: oklch(0.155 0.012 258);
+  --card: oklch(0.225 0.013 258);
+  --card-foreground: oklch(0.95 0.005 255);
+  --popover: oklch(0.255 0.014 258);
+  --popover-foreground: oklch(0.95 0.005 255);
+
+  --primary: oklch(0.72 0.13 255);
+  --primary-foreground: oklch(0.18 0.03 258);
+  --ring: oklch(0.72 0.13 255);
+
+  --secondary: oklch(0.27 0.014 258);
+  --secondary-foreground: oklch(0.95 0.005 255);
+  --muted: oklch(0.255 0.012 258);
+  --muted-foreground: oklch(0.72 0.015 258);
+  --accent: oklch(0.28 0.025 258);
+  --accent-foreground: oklch(0.96 0.005 255);
+  --border: oklch(0.29 0.013 258);
+  --input: oklch(0.35 0.014 258);
+
+  --destructive: oklch(0.7 0.17 25);
+  --destructive-foreground: oklch(0.18 0.03 25);
+  --success: oklch(0.74 0.13 155);
+  --success-foreground: oklch(0.18 0.03 155);
+  --warning: oklch(0.8 0.13 75);
+  --warning-foreground: oklch(0.2 0.04 65);
+  --info: oklch(0.74 0.11 235);
+  --info-foreground: oklch(0.18 0.03 235);
+
+  --chart-1: oklch(0.72 0.13 255);
+  --chart-2: oklch(0.72 0.11 185);
+  --chart-3: oklch(0.78 0.12 75);
+  --chart-4: oklch(0.7 0.14 305);
+  --chart-5: oklch(0.7 0.15 20);
+
+  --sidebar-foreground: oklch(0.95 0.005 255);
+  --sidebar-primary: oklch(0.72 0.13 255);
+  --sidebar-primary-foreground: oklch(0.18 0.03 258);
+  --sidebar-accent: oklch(0.26 0.025 258);
+  --sidebar-accent-foreground: oklch(0.96 0.005 255);
+  --sidebar-border: oklch(0.26 0.012 258);
+  --sidebar-ring: oklch(0.72 0.13 255);
+
+  --shadow-2xs: 0 1px 0 oklch(0 0 0 / 0.2);
+  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.25);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.25), 0 1px 3px oklch(0 0 0 / 0.2);
+  --shadow: 0 1px 3px oklch(0 0 0 / 0.3), 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px -2px oklch(0 0 0 / 0.4), 0 2px 4px -2px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 28px -6px oklch(0 0 0 / 0.5), 0 4px 8px -4px oklch(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 40px -8px oklch(0 0 0 / 0.55), 0 8px 16px -8px oklch(0 0 0 / 0.35);
+  --shadow-2xl: 0 28px 56px -12px oklch(0 0 0 / 0.6);
+}
+
+/*
+ * Type scale (a 1.2 ratio from a 14 px body): page title, section title, body (text-sm, text-base on mobile
+ * inputs), caption. Used as text-page-title, text-section-title, text-caption.
+ */
+@theme {
+  --text-page-title: 1.5rem;
+  --text-page-title--line-height: 2rem;
+  --text-page-title--letter-spacing: -0.018em;
+  --text-page-title--font-weight: 600;
+  --text-section-title: 1rem;
+  --text-section-title--line-height: 1.5rem;
+  --text-section-title--letter-spacing: -0.006em;
+  --text-section-title--font-weight: 600;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+}

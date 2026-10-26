@@ -1,0 +1,7 @@
+# Security headers, included by every location of default.conf that sets its own headers (add_header in a location
+# replaces the server's). ${OIDC_ORIGIN} is the origin of OIDC_AUTHORITY: the app calls its discovery, token and
+# userinfo endpoints. Silent renew uses the refresh token (a fetch), so no frame of the provider is needed.
+# style-src needs 'unsafe-inline': Radix and sonner add <style> elements at runtime.
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' ${OIDC_ORIGIN}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;

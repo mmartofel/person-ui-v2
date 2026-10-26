@@ -1,0 +1,13 @@
+# Runtime configuration of the UI (README "Deploy"): read by the container at startup, no rebuild per environment.
+# The values match the API kickstart's local stack (docs/API-KICKSTART.md); replace them per environment.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crud-ui-blueprint-config
+data:
+  # Public URL of the OIDC realm, as the browser reaches it.
+  OIDC_AUTHORITY: http://localhost:8080/realms/my-realm
+  OIDC_CLIENT_ID: my-realm-ui
+  OIDC_ROLES_CLAIM: realm_access.roles
+  # The API service inside the cluster; nginx proxies /api/ there, path unchanged.
+  API_UPSTREAM: http://my-api:8080

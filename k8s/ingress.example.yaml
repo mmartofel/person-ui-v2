@@ -1,0 +1,31 @@
+# Example only (not in kustomization.yaml): one host for the UI and the API. /api goes straight to the API, the rest
+# to the UI. The UI's nginx also proxies /api (API_UPSTREAM), so without an Ingress the UI service alone works too.
+# Add the host to the OIDC client's redirect URIs (https://ui.example.com/*) and set OIDC_AUTHORITY to the public
+# realm URL.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crud-ui-blueprint
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [ui.example.com]
+      secretName: ui-example-com-tls
+  rules:
+    - host: ui.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: my-api
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crud-ui-blueprint
+                port:
+                  number: 8080

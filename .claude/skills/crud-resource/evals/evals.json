@@ -1,0 +1,67 @@
+{
+  "skill_name": "crud-resource",
+  "evals": [
+    {
+      "id": 1,
+      "name": "new-resource-compliant",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi.json contract/openapi.json\n\nThen: add the persons resource (OpenAPI tag Persons). I already pulled the contract, no need to pull or regenerate.",
+      "expected_output": "The contract-auditor finds Persons compliant; the skill drafts a resources.persons entry for ui-manifest.yaml from the contract, lists the open decisions and stops for approval without writing code.",
+      "files": [
+        "src/test/fixtures/contract/openapi.json"
+      ],
+      "expectations": [
+        "The contract-auditor agent was run for the Persons tag before any manifest draft was shown",
+        "The output reports Persons as compliant",
+        "The manifest draft for persons has the keys route, nav, display, permissions, list, detail and form",
+        "The draft uses the contract's fields (firstName, lastName, email, status) and the PersonStatus values AVAILABLE and UNAVAILABLE, and no field that is not in the contract",
+        "The draft proposes list filters from the named query params of listPersons (status, availableOn, countryCode)",
+        "The output lists open decisions (e.g. role names, columns out of view at 768 px) or says there are none",
+        "The output explicitly stops and asks the user to approve the draft",
+        "No file under src/features/ was created and ui-manifest.yaml was not changed"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "contract-change-new-field",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi.json contract/openapi.json; replace `resources: {}` in ui-manifest.yaml with the `resources:` block of src/test/fixtures/ui-manifest.yaml; cp -r .claude/skills/crud-resource/references/examples/persons/feature src/features/persons; cp .claude/skills/crud-resource/references/examples/persons/locales/en/persons.json src/locales/en/ && cp .claude/skills/crud-resource/references/examples/persons/locales/pl/persons.json src/locales/pl/; git add -A && git commit -qm 'eval setup: Person API 3.4.2'; then cp src/test/fixtures/contract/openapi-new-field.json contract/openapi.json\n\nThen: the API changed, I pulled the new contract (Person API 3.5.0). Update persons.",
+      "expected_output": "The skill audits the new contract, finds one change for Persons (an optional phone field on create, update and response), says other tags are out of scope, drafts where phone goes in the manifest and stops for approval.",
+      "files": [
+        "src/test/fixtures/contract/openapi.json",
+        "src/test/fixtures/contract/openapi-new-field.json",
+        "src/test/fixtures/ui-manifest.yaml",
+        ".claude/skills/crud-resource/references/examples/persons/"
+      ],
+      "expectations": [
+        "The contract-auditor agent was run and Persons is reported compliant",
+        "The diff of contract/openapi.json was read (git diff) and the output names phone as an added optional string field on PersonCreateRequest, PersonUpdateRequest and PersonResponse",
+        "The output mentions the phone constraints (maxLength 20 and its pattern)",
+        "The output does not report any other Persons change than phone and the version",
+        "The output says Tasks (other tags) are out of scope or unchanged",
+        "The draft says for each of the list, the detail and the form whether phone goes there and where (a reasoned 'no list column' counts)",
+        "The output explicitly stops and asks the user to approve the draft",
+        "ui-manifest.yaml and src/ are unchanged after the run (git status shows only contract/openapi.json modified); the absence of src/api/generated/ in the blueprint may be noted but is not a failure"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "non-compliant-contract-stops",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi-non-compliant.json contract/openapi.json\n\nThen: build the persons screens (tag Persons). Contract is already pulled.",
+      "expected_output": "The contract-auditor finds Persons not compliant; the skill stops in Phase A and prints the auditor's API changes as a prompt for the API repo, without drafting a manifest or writing files.",
+      "files": [
+        "src/test/fixtures/contract/openapi-non-compliant.json"
+      ],
+      "expectations": [
+        "The contract-auditor agent was run for the Persons tag",
+        "The output reports Persons as not compliant",
+        "The output names the PersonResponse without a required list",
+        "The output names the Java-only (?i) pattern on firstName",
+        "The output names the */* media type on the getPerson 200 response",
+        "The output names the single pageable query parameter instead of page, size and sort",
+        "The API changes are in a fenced block written as a prompt to paste into the API repo",
+        "No manifest draft is shown and the output says the skill stops until the API is fixed",
+        "The skill does not propose a UI workaround for any violation",
+        "No file was changed except contract/openapi.json by the setup"
+      ]
+    }
+  ]
+}

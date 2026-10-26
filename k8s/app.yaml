@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud-ui-blueprint
+spec:
+  selector:
+    matchLabels:
+      app: crud-ui-blueprint
+  template:
+    metadata:
+      labels:
+        app: crud-ui-blueprint
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: crud-ui-blueprint
+          image: crud-ui-blueprint
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: crud-ui-blueprint-config
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          # Writable paths of the read-only container: the rendered nginx config, and /tmp (pid, caches, config.js).
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: nginx-conf
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crud-ui-blueprint
+spec:
+  selector:
+    app: crud-ui-blueprint
+  ports:
+    - port: 8080

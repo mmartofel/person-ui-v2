@@ -1,0 +1,22 @@
+# `skaffold dev`: builds the image (Dockerfile) and deploys k8s/ to the current kube context. The UI is forwarded to
+# localhost:5173, the redirect URI the OIDC client accepts in development.
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: crud-ui-blueprint
+build:
+  artifacts:
+    - image: crud-ui-blueprint
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  kustomize:
+    paths:
+      - k8s
+deploy:
+  kubectl: {}
+portForward:
+  - resourceType: service
+    resourceName: crud-ui-blueprint
+    port: 8080
+    localPort: 5173

@@ -1,0 +1,68 @@
+#!/bin/sh
+# Runtime configuration of the UI. Sourced by the nginx image's entrypoint before it renders /etc/nginx/templates,
+# so the exported OIDC_ORIGIN reaches the CSP template. Stops the container when a required variable is missing.
+# Writes /tmp/runtime/config.js, which the app reads at startup (src/config.ts); nginx serves it as /config.js.
+
+missing=""
+for name in OIDC_AUTHORITY OIDC_CLIENT_ID API_UPSTREAM; do
+  eval "value=\${$name:-}"
+  [ -n "$value" ] || missing="$missing $name"
+done
+if [ -n "$missing" ]; then
+  echo "UI configuration: missing environment variable(s):$missing (see README \"Deploy\")" >&2
+  exit 1
+fi
+# The image only logs an error when it cannot render the templates, then starts nginx without the server: fail instead.
+# With a read-only root filesystem, mount writable volumes on /etc/nginx/conf.d and /tmp (k8s/app.yaml).
+for dir in /etc/nginx/conf.d /tmp; do
+  if [ ! -w "$dir" ]; then
+    echo "UI configuration: $dir is not writable for user $(id -u) (mount a writable volume there)" >&2
+    exit 1
+  fi
+done
+
+# The authority's origin (scheme://host[:port]) for the CSP connect-src; checked so it cannot break the header.
+OIDC_ORIGIN=$(printf '%s' "$OIDC_AUTHORITY" | sed -E 's#^(https?://[^/]+).*#\1#')
+case "$OIDC_ORIGIN" in
+  http://*[!A-Za-z0-9.:/-]* | https://*[!A-Za-z0-9.:/-]*) bad=1 ;;
+  http://?* | https://?*) bad= ;;
+  *) bad=1 ;;
+esac
+if [ -n "$bad" ]; then
+  echo "UI configuration: OIDC_AUTHORITY must be an http(s) URL, got: $OIDC_AUTHORITY" >&2
+  exit 1
+fi
+export OIDC_ORIGIN
+
+# proxy_pass with a path would replace /api/ in the forwarded URL, so only scheme://host[:port] is accepted.
+case "$API_UPSTREAM" in
+  http://*/* | https://*/*) bad=1 ;;
+  http://?* | https://?*) bad= ;;
+  *) bad=1 ;;
+esac
+if [ -n "$bad" ]; then
+  echo "UI configuration: API_UPSTREAM must be scheme://host[:port] without a path, got: $API_UPSTREAM" >&2
+  exit 1
+fi
+
+# One-line values only: config.js holds them as JavaScript strings.
+nl='
+'
+for name in OIDC_CLIENT_ID OIDC_ROLES_CLAIM; do
+  eval "value=\${$name:-}"
+  case "$value" in
+    *"$nl"*) echo "UI configuration: $name must be a single line" >&2; exit 1 ;;
+  esac
+done
+
+json() { printf '"%s"' "$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')"; }
+
+mkdir -p /tmp/runtime
+cat > /tmp/runtime/config.js <<CONFIG
+window.__APP_CONFIG__ = {
+  OIDC_AUTHORITY: $(json "$OIDC_AUTHORITY"),
+  OIDC_CLIENT_ID: $(json "$OIDC_CLIENT_ID"),
+  OIDC_ROLES_CLAIM: $(json "${OIDC_ROLES_CLAIM:-}"),
+}
+CONFIG
+echo "UI configuration: OIDC $OIDC_AUTHORITY (client $OIDC_CLIENT_ID), /api -> $API_UPSTREAM"

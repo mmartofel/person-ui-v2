@@ -1,0 +1,14 @@
+# Only what `npm ci` and `npm run build` need goes into the build context.
+.git
+node_modules
+dist
+.env
+.env*.local
+coverage
+playwright-report
+test-results
+blob-report
+reports
+e2e/.auth
+.playwright-mcp
+.claude/settings.local.json

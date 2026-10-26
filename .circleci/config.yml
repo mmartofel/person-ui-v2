@@ -1,0 +1,83 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:24.14
+    steps:
+      - checkout
+      - restore_cache:
+          key: npm-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: npm-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Audit dependencies (high and critical)
+          command: npm audit --audit-level=high
+      - run:
+          name: Typecheck
+          command: npm run typecheck
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Unit tests
+          command: npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/junit.xml
+      - run:
+          name: Build
+          command: npm run build
+      - run:
+          name: Check the generated API client matches the contract
+          command: npm run contract:check
+      - store_test_results:
+          path: reports
+
+  # The component gallery in the browser: functional and axe specs plus the screenshot baselines
+  # (e2e/__screenshots__), in the Playwright image the baselines were made in (keep its version equal to @playwright/test).
+  # Needs no API or login.
+  gallery:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.64.1-noble
+    steps:
+      - checkout
+      - restore_cache:
+          key: npm-playwright-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: npm-playwright-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Gallery, accessibility and visual regression
+          command: VISUAL=1 npx playwright test --project=gallery --project=visual --workers=2
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: playwright-report
+      - store_artifacts:
+          path: test-results
+
+  # The production image (Dockerfile). Built only, not pushed: to publish it, add a registry login and
+  # `docker push` with your image name and tag (README "Deploy").
+  image:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build the production image
+          command: docker build -t crud-ui-blueprint:${CIRCLE_SHA1} .
+
+workflows:
+  build:
+    jobs:
+      - build
+      - gallery
+      - image

@@ -1,0 +1,52 @@
+{
+  "skill_name": "contract-auditor",
+  "evals": [
+    {
+      "id": 1,
+      "name": "compliant-all-tags",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi.json contract/openapi.json\n\nThen: run the contract-auditor agent on the whole contract and show me its report.",
+      "expected_output": "Persons and Tasks are both compliant; the report lists the checks that passed and changes nothing.",
+      "files": ["src/test/fixtures/contract/openapi.json"],
+      "expectations": [
+        "The report starts with one line per tag: Persons: Compliant and Tasks: Compliant",
+        "The report contains no prompt for the API repo",
+        "The report ends with the list of checks that were run and passed (operationIds, media types, status codes, required response fields, paged list, Problem Details, version on update, patterns, enums, filters and relations, required text)",
+        "Any warning is marked as a warning, not a violation, and is not one of the points API-CONTRACT.md section 8 accepts as is",
+        "The agent changed no file (git status shows only contract/openapi.json from the setup)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "non-compliant-persons",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi-non-compliant.json contract/openapi.json\n\nThen: ask the contract-auditor agent to audit all tags and show me its report.",
+      "expected_output": "Persons is not compliant with four problems (missing required list, Java-only pattern, */* response, pageable object); Tasks is compliant; a pasteable prompt for the API repo.",
+      "files": ["src/test/fixtures/contract/openapi-non-compliant.json"],
+      "expectations": [
+        "The report starts with the verdict lines, nothing before them: Persons: Not compliant (with a violation count), then Tasks: Compliant",
+        "It names PersonResponse having no required list (check 4)",
+        "It names the (?i) pattern on firstName as Java-only syntax that JavaScript rejects (check 8)",
+        "It names the */* media type on GET /api/persons/{id} 200 (check 2)",
+        "It names the single pageable query parameter that should be page, size and sort (check 5)",
+        "Each violation cites its API-CONTRACT.md section",
+        "The violations are in a fenced block that starts 'Make the Persons endpoints compliant with docs/API-CONTRACT.md' and ends asking to regenerate the contract and bump the version",
+        "It reports no violation that is not in the fixture (Tasks and the rest of Persons are as in the compliant contract)",
+        "The agent changed no file"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "contract-change-diff",
+      "prompt": "Setup (eval only, run it first in this throwaway worktree): cp src/test/fixtures/contract/openapi.json contract/openapi.json; git add contract/openapi.json && git commit -qm 'eval setup: Person API 3.4.2'; then cp src/test/fixtures/contract/openapi-new-field.json contract/openapi.json\n\nThen: I just pulled Person API 3.5.0. Ask the contract-auditor agent what changed in Persons and whether it is still compliant.",
+      "expected_output": "The auditor diffs the contract, reports one change (optional phone on create, update and response, plus the version) and that Persons is still compliant.",
+      "files": ["src/test/fixtures/contract/openapi.json", "src/test/fixtures/contract/openapi-new-field.json"],
+      "expectations": [
+        "The agent ran git diff on contract/openapi.json (or against the last commit that touched it)",
+        "The report names phone as added to PersonCreateRequest, PersonUpdateRequest and PersonResponse, optional, with maxLength 20 and a pattern",
+        "The report says the phone pattern compiles in JavaScript",
+        "The report gives the version change 3.4.2 -> 3.5.0 and no other Persons change",
+        "Persons: Compliant (and Tasks: Compliant or out of scope)",
+        "The agent changed no file"
+      ]
+    }
+  ]
+}
