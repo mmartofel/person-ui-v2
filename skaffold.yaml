@@ -3,10 +3,10 @@
 apiVersion: skaffold/v4beta13
 kind: Config
 metadata:
-  name: crud-ui-blueprint
+  name: person-ui-v2
 build:
   artifacts:
-    - image: crud-ui-blueprint
+    - image: person-ui-v2
       docker:
         dockerfile: Dockerfile
 manifests:
@@ -17,6 +17,6 @@ deploy:
   kubectl: {}
 portForward:
   - resourceType: service
-    resourceName: crud-ui-blueprint
+    resourceName: person-ui-v2
     port: 8080
     localPort: 5173

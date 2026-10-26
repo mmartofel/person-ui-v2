@@ -3,11 +3,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: crud-ui-blueprint-config
+  name: person-ui-v2-config
 data:
   # Public URL of the OIDC realm, as the browser reaches it.
-  OIDC_AUTHORITY: http://localhost:8080/realms/my-realm
-  OIDC_CLIENT_ID: my-realm-ui
+  OIDC_AUTHORITY: http://localhost:8080/realms/person
+  OIDC_CLIENT_ID: person-ui
   OIDC_ROLES_CLAIM: realm_access.roles
   # The API service inside the cluster; nginx proxies /api/ there, path unchanged.
-  API_UPSTREAM: http://my-api:8080
+  API_UPSTREAM: http://spring-person-api:8080

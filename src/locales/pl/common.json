@@ -84,7 +84,10 @@
   },
   "notifications": "Powiadomienia",
   "documentTitle": "{{page}} – {{app}}",
-  "roles": {},
+  "roles": {
+    "person-viewer": "Przeglądający",
+    "person-editor": "Edytor"
+  },
   "list": {
     "search": "Szukaj",
     "searchPlaceholder": "Szukaj…",

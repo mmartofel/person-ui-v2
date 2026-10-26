@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: crud-ui-blueprint
+  name: person-ui-v2
 spec:
   selector:
     matchLabels:
-      app: crud-ui-blueprint
+      app: person-ui-v2
   template:
     metadata:
       labels:
-        app: crud-ui-blueprint
+        app: person-ui-v2
     spec:
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: crud-ui-blueprint
-          image: crud-ui-blueprint
+        - name: person-ui-v2
+          image: person-ui-v2
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: crud-ui-blueprint-config
+                name: person-ui-v2-config
           readinessProbe:
             httpGet:
               path: /healthz
@@ -57,9 +57,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: crud-ui-blueprint
+  name: person-ui-v2
 spec:
   selector:
-    app: crud-ui-blueprint
+    app: person-ui-v2
   ports:
     - port: 8080

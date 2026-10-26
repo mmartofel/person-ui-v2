@@ -5,7 +5,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: crud-ui-blueprint
+  name: person-ui-v2
 spec:
   ingressClassName: nginx
   tls:
@@ -19,13 +19,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: my-api
+                name: spring-person-api
                 port:
                   number: 8080
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: crud-ui-blueprint
+                name: person-ui-v2
                 port:
                   number: 8080
