@@ -74,6 +74,14 @@ test.describe('persons as writer', () => {
     await expect(page.getByRole('heading', { level: 1, name: `Anne ${lastName}` })).toBeVisible()
     await expect(page.getByText('Date of birth').locator('xpath=following-sibling::dd[1]')).toHaveText('Not provided')
 
+    // Back through the list, so the list is cached with the person when the delete returns to it.
+    await page.getByRole('link', { name: 'Back to list' }).click()
+    await page.getByRole('searchbox').fill(lastName)
+    await expectListParams(page, { q: lastName })
+    await expect(page.getByRole('main').getByRole('link', { name: new RegExp(lastName) })).not.toHaveCount(0)
+    await page.getByRole('main').getByRole('link', { name: new RegExp(lastName) }).first().click()
+    await expect(page.getByRole('heading', { level: 1, name: `Anne ${lastName}` })).toBeVisible()
+
     // Delete with a confirmation that names the person; cancelling returns focus to the Delete button.
     await page.getByRole('button', { name: 'Delete' }).click()
     await page.keyboard.press('Escape')
@@ -81,11 +89,23 @@ test.describe('persons as writer', () => {
     await page.getByRole('button', { name: 'Delete' }).click()
     const dialog = page.getByRole('alertdialog', { name: `Delete Anne ${lastName}?` })
     await expectAccessible(page, '[role=alertdialog]')
+    // The list must never draw the deleted person, not even on its first render from the cache.
+    await page.evaluate((name) => {
+      const seen = window as unknown as { deletedShown?: boolean }
+      seen.deletedShown = false
+      new MutationObserver(() => {
+        const links = document.querySelectorAll('main a')
+        if (location.pathname === '/persons' && [...links].some((a) => a.textContent?.includes(name))) seen.deletedShown = true
+      }).observe(document.body, { childList: true, subtree: true, characterData: true })
+    }, lastName)
     await dialog.getByRole('button', { name: 'Delete' }).click()
-    await expect(page).toHaveURL('/persons')
+    await expect(page).toHaveURL(/\/persons(\?|$)/)
     await expect(page.getByText(`Anne ${lastName} was deleted.`)).toBeVisible()
     // The Delete button is gone with the page: focus is in the list's search box.
     await expect(page.getByRole('searchbox')).toBeFocused()
+    // The toast comes before the list renders: check once the list shows its (empty) result.
+    await expect(page.getByRole('main').getByText('No results', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => (window as unknown as { deletedShown?: boolean }).deletedShown)).toBe(false)
 
     await page.getByRole('searchbox').fill(lastName)
     await expect(page.getByText(`Nothing matches “${lastName}”.`, { exact: false })).toBeVisible()

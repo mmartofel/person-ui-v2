@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { FilterX, Plus, SearchX } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import type { AnyRecord } from '@/api/sources'
 import { useRoles } from '@/auth'
 import { Button } from '@/components/ui/button'
@@ -72,10 +72,14 @@ export function ResourceList<T extends AnyRecord>({
 
   // Empty-state actions disappear with the state they clear: keep keyboard focus in the toolbar (the search box).
   const focusSearch = () => toolbarRef.current?.querySelector<HTMLElement>('input[type=search]')?.focus()
-  // Arriving from a deleted record's detail page: focus the search box, not the page body.
-  const arrivedFocusSearch = isListFocusSearch(useLocation().state)
+  // Arriving from a deleted record's detail page: focus the search box, not the page body. The state is cleared, so a
+  // reload or Back does not move focus again.
+  const location = useLocation()
+  const navigate = useNavigate()
   useEffect(() => {
-    if (arrivedFocusSearch) focusSearch()
+    if (!isListFocusSearch(location.state)) return
+    focusSearch()
+    void navigate({ search: location.search, hash: location.hash }, { replace: true, state: null })
     // On arrival only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -71,14 +71,16 @@ function DetailView<T extends AnyRecord>({
     remove,
     onDeleted: (deleted) => {
       deletedRecord.current = deleted
+      // Before leaving: the list page reads its cache while rendering, so cached lists would show the deleted
+      // record until the refetch. This page observes no list of its own resource, so nothing refetches here.
+      queryClient.removeQueries({ queryKey: sourceOf(resource.key).listKey({}) })
       // The list puts focus in its search box: the Delete button that had it is gone.
       navigate(listHref, { replace: true, state: listFocusSearch })
     },
   })
-  // The cache update waits until this page has unmounted: removing the query while the page (or the breadcrumbs)
-  // still shows the record would fetch the deleted record again (a 404). It runs before the list page subscribes
-  // (React runs every unmount cleanup of a commit before its mount effects): the resource's cached lists are dropped,
-  // so the list loads once and never shows the deleted record.
+  // The feature's cache update (remove the detail query, invalidate the lists) waits until this page has unmounted:
+  // removing the detail query while the page (or the breadcrumbs) still shows the record would fetch it again (a 404).
+  // It runs before the list page subscribes, so the list still loads only once.
   const deletedRecord = useRef<T>(undefined)
   const onDeletedRef = useRef(onDeleted)
   useEffect(() => {
@@ -87,12 +89,8 @@ function DetailView<T extends AnyRecord>({
   useEffect(
     () => () => {
       const deleted = deletedRecord.current
-      if (!deleted) return
-      queryClient.removeQueries({ queryKey: sourceOf(resource.key).listKey({}) })
-      onDeletedRef.current(deleted)
+      if (deleted) onDeletedRef.current(deleted)
     },
-    // Runs once, on unmount; the resource and client do not change while the page is shown.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
   const status = resource.detail.status
