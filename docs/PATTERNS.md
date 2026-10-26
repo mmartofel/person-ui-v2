@@ -216,8 +216,9 @@ Known gaps, left as is:
 - **Open from the D3 (resource screens) review:**
   - the list table's frame is capped at the viewport height (for the sticky header), so with 20+ rows the table
     scrolls inside its card before the page does; kept as the documented design;
-  - ~~the gallery's two forms made react-router warn "A router only supports one blocker at a time"~~: fixed in 1.1.1
-    (a form registers its blocker only while it has unsaved changes);
+  - ~~the gallery's two forms made react-router warn "A router only supports one blocker at a time"~~: fixed (1.1.1:
+    a form registers its blocker only while it has unsaved changes; 1.1.2: the gallery's second form has
+    `confirmLeave={false}`, so two dirty forms no longer warn either);
   - the checkbox itself is 16 px; its label fills the 44 px row and toggles it (unchanged from before D3).
 - **Open from the D2 (app shell) review:**
   - on very wide screens (1920) the breadcrumbs start at the header's left padding, not at the centred content

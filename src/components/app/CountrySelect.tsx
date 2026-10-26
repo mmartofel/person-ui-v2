@@ -6,6 +6,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { countryName, countryOptions } from '@/lib/countries'
 import { cn } from '@/lib/utils'
+import { pickerTriggerClass } from './pickerTrigger'
 
 type TriggerProps = Omit<ComponentProps<'button'>, 'value' | 'onChange' | 'ref'>
 
@@ -42,7 +43,7 @@ export function CountrySelect({ value, onChange, allowEmpty, emptyLabel, ref, cl
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between bg-transparent font-normal', !value && 'text-muted-foreground', className)}
+          className={pickerTriggerClass(!value && !emptyLabel, className)}
         >
           <span className="truncate">
             {value ? countryName(value, language) : (emptyLabel ?? t('common.form.chooseCountry'))}

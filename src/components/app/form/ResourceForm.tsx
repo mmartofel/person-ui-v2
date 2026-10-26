@@ -71,6 +71,9 @@ interface ResourceFormProps<TRecord extends VersionedRecord, TSchema extends z.Z
   /** Loads the latest version after a stale-version conflict. */
   reload?: () => Promise<TRecord | undefined>
   cancelHref: string
+  /** Asks before leaving with unsaved changes (default). A router allows one blocker: on a page with two forms
+   *  (the gallery) only one may ask. */
+  confirmLeave?: boolean
 }
 
 /**
@@ -86,6 +89,7 @@ export function ResourceForm<TRecord extends VersionedRecord, TSchema extends z.
   onSaved,
   reload,
   cancelHref,
+  confirmLeave = true,
 }: ResourceFormProps<TRecord, TSchema>) {
   type Body = z.output<TSchema> & FieldValues
   const { t, i18n } = useTranslation()
@@ -224,9 +228,8 @@ export function ResourceForm<TRecord extends VersionedRecord, TSchema extends z.
           </Button>
         </div>
       </form>
-      {/* Mounted only while there is something to lose: a router allows one blocker, and a page may show two forms
-          (the gallery). */}
-      {isDirty && savedId === undefined && <UnsavedChangesGuard when />}
+      {/* Mounted only while there is something to lose: a router allows one blocker. */}
+      {confirmLeave && isDirty && savedId === undefined && <UnsavedChangesGuard when />}
       <ConfirmDialog
         open={staleOpen}
         onOpenChange={setStaleOpen}

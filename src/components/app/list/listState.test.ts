@@ -1,6 +1,6 @@
 import { ListPersonsQueryParams } from '@/test/fixtures/api/persons.zod'
 import { ListTasksQueryParams } from '@/test/fixtures/api/tasks.zod'
-import { parseListState, toApiParams, writeListState } from './listState'
+import { isListFocusSearch, listFocusSearch, parseListState, toApiParams, writeListState } from './listState'
 import { fixtureResource } from '@/test/fixtures'
 
 const { list } = fixtureResource('persons')
@@ -65,5 +65,13 @@ describe('list state in the URL', () => {
   it('builds the API query params', () => {
     expect(toApiParams(parse('sort=email,desc&q=jan'))).toEqual({ page: 0, size: 20, sort: ['email,desc'], q: 'jan' })
     expect(toApiParams(parse(''))).not.toHaveProperty('q')
+  })
+})
+
+describe('list focus on arrival', () => {
+  it('recognises the state a deleted record\'s detail page navigates with', () => {
+    expect(isListFocusSearch(listFocusSearch)).toBe(true)
+    expect(isListFocusSearch(null)).toBe(false)
+    expect(isListFocusSearch({ focus: 'other' })).toBe(false)
   })
 })

@@ -9,6 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { formatDisplay, getResource, type ResourceKey } from '@/manifest'
+import { pickerTriggerClass } from './pickerTrigger'
 
 const DEBOUNCE_MS = 300
 const PAGE_SIZE = 20
@@ -113,7 +114,7 @@ export function RelationSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between bg-transparent font-normal', !value && 'text-muted-foreground', className)}
+          className={pickerTriggerClass(!value && !emptyLabel, className)}
         >
           <span className="truncate">{value ? name : (emptyLabel ?? t('common.form.chooseRecord'))}</span>
           <ChevronsUpDown aria-hidden className="opacity-50" />

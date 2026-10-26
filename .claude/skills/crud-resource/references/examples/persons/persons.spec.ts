@@ -84,6 +84,8 @@ test.describe('persons as writer', () => {
     await dialog.getByRole('button', { name: 'Delete' }).click()
     await expect(page).toHaveURL('/persons')
     await expect(page.getByText(`Anne ${lastName} was deleted.`)).toBeVisible()
+    // The Delete button is gone with the page: focus is in the list's search box.
+    await expect(page.getByRole('searchbox')).toBeFocused()
 
     await page.getByRole('searchbox').fill(lastName)
     await expect(page.getByText(`Nothing matches “${lastName}”.`, { exact: false })).toBeVisible()

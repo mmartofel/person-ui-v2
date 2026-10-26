@@ -157,3 +157,9 @@ export function useListHref(resource: Resource): string {
   }
   return search ? `${resource.route}?${search}` : resource.route
 }
+
+/** Navigation state that makes the list focus its search box on arrival (the control that had focus is gone). */
+export const listFocusSearch = { focus: 'search' } as const
+
+export const isListFocusSearch = (state: unknown) =>
+  typeof state === 'object' && state !== null && (state as { focus?: unknown }).focus === 'search'

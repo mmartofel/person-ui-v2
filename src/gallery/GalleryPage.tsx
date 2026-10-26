@@ -377,6 +377,8 @@ function FormSection() {
           save={(body) => fakeSave(outcome, newTask, body)}
           onSaved={() => {}}
           cancelHref="/__gallery"
+          // The person form above asks before leaving; the router allows one blocker.
+          confirmLeave={false}
         />
       </div>
     </Section>

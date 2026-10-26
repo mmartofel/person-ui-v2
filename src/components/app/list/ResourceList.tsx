@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { FilterX, Plus, SearchX } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import type { AnyRecord } from '@/api/sources'
 import { useRoles } from '@/auth'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ import { ListSkeleton } from './ListSkeleton'
 import { Pagination } from './Pagination'
 import { RowActions } from './RowActions'
 import { SearchInput } from './SearchInput'
-import type { useListState } from './listState'
+import { isListFocusSearch, type useListState } from './listState'
 
 /** The parts of a generated list query (`useListPersons(...)`) the list reads. */
 export interface ListQuery<T extends AnyRecord> {
@@ -72,6 +72,13 @@ export function ResourceList<T extends AnyRecord>({
 
   // Empty-state actions disappear with the state they clear: keep keyboard focus in the toolbar (the search box).
   const focusSearch = () => toolbarRef.current?.querySelector<HTMLElement>('input[type=search]')?.focus()
+  // Arriving from a deleted record's detail page: focus the search box, not the page body.
+  const arrivedFocusSearch = isListFocusSearch(useLocation().state)
+  useEffect(() => {
+    if (arrivedFocusSearch) focusSearch()
+    // On arrival only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   // Deleting the last row removes the menu that opened the dialog: focus goes to the search box.
   const deletion = useDeleteRecord<T>({ resource, remove, onDeleted, fallbackFocus: focusSearch })
   const newButton = (
