@@ -21,7 +21,8 @@ test.describe('app shell', () => {
     await loginAs(page, 'writer')
 
     // HOME
-    await expect(page.getByRole('heading', { level: 1, name: 'No resources yet' })).toBeVisible()
+    await expect(page).toHaveURL(/\/persons/)
+    await expect(page.getByRole('heading', { level: 1, name: 'Persons' })).toBeVisible()
     await expectAccessible(page)
     await openUserMenu(page)
     await expect(page.getByRole('menu')).toContainText('Roles')
@@ -37,10 +38,10 @@ test.describe('app shell', () => {
     await switchLanguage(page, 'Polski')
 
     // HOME
-    await expect(page.getByRole('heading', { level: 1, name: 'Brak zasobów' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Osoby' })).toBeVisible()
     await expect(page.locator('html')).toHaveAttribute('lang', 'pl')
     await page.reload()
-    await expect(page.getByRole('heading', { level: 1, name: 'Brak zasobów' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Osoby' })).toBeVisible()
 
     await openUserMenu(page)
     await page.getByRole('menuitem', { name: 'Wyloguj' }).click()
@@ -55,7 +56,8 @@ test.describe('app shell', () => {
     await page.getByRole('button', { name: 'Sign in again' }).click()
     await fillLoginForm(page, 'reader')
 
-    await expect(page).toHaveURL('/')
+    // HOME: `/` opens the first resource.
+    await expect(page).toHaveURL('/persons')
     await expect(page.getByRole('banner')).toBeVisible()
   })
 })
@@ -99,13 +101,13 @@ test.describe('app shell as reader', () => {
 
     await page.getByRole('button', { name: 'Open menu' }).click()
     const dialog = page.getByRole('dialog')
-    // HOME: no resources yet, so there is no navigation; with resources, click one and expect its route.
-    await expect(dialog.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0)
+    // HOME: navigation lists the resources; clicking one closes the menu and opens its route.
+    await expect(dialog.getByRole('navigation', { name: 'Main navigation' })).toBeVisible()
     await expect(dialog.getByRole('button', { name: /user menu/i })).toBeVisible()
     await expectAccessible(page, '[role=dialog]')
-    await dialog.getByRole('button', { name: 'Close menu' }).click()
+    await dialog.getByRole('link', { name: 'Persons' }).click()
     await expect(dialog).toBeHidden()
-    await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
+    await expect(page).toHaveURL('/persons')
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

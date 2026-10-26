@@ -6,6 +6,16 @@ import { expect, type Page } from '@playwright/test'
 
 /** Fails with the rule, impact and elements of every serious or critical axe violation on the page (or `include`). */
 export async function expectAccessible(page: Page, include?: string) {
+  // A dialog or menu fades in, and its text fails contrast until the animation ends: wait for finite animations
+  // (skeleton pulses run forever).
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => {})),
+    ),
+  )
   let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
   if (include) builder = builder.include(include)
   const { violations } = await builder.analyze()

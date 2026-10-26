@@ -1,5 +1,7 @@
 // The generated list/get functions of each resource, by manifest key, for generic components that read a
 // resource: relation inputs and filters, embedded links, related lists and the breadcrumbs. One line per resource.
+import { getGetPersonQueryKey, getListPersonsQueryKey, getPerson, listPersons } from '@/api/generated/endpoints/persons/persons'
+import { getGetTaskQueryKey, getListTasksQueryKey, getTask, listTasks } from '@/api/generated/endpoints/tasks/tasks'
 import type { ResourceKey } from '@/manifest'
 
 /** A record as generic code sees it: an id and fields read through the manifest. */
@@ -17,7 +19,10 @@ export interface ResourceSource {
 
 // One line per resource, e.g. (imports from '@/api/generated/endpoints/orders/orders'):
 //   orders: { list: listOrders, get: getOrder, listKey: getListOrdersQueryKey, getKey: getGetOrderQueryKey },
-export const sources: Record<ResourceKey, ResourceSource> = {}
+export const sources: Record<ResourceKey, ResourceSource> = {
+  persons: { list: listPersons, get: getPerson, listKey: getListPersonsQueryKey, getKey: getGetPersonQueryKey },
+  tasks: { list: listTasks, get: getTask, listKey: getListTasksQueryKey, getKey: getGetTaskQueryKey },
+}
 
 /** The registered source of a resource; every resource must be in `sources`. */
 export function sourceOf(resource: ResourceKey): ResourceSource {

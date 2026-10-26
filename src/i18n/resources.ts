@@ -3,13 +3,17 @@
 // ui-manifest.yaml `app.languages`.
 import enCommon from '@/locales/en/common.json'
 import enEnums from '@/locales/en/enums.json'
+import enPersons from '@/locales/en/persons.json'
+import enTasks from '@/locales/en/tasks.json'
 import plCommon from '@/locales/pl/common.json'
 import plEnums from '@/locales/pl/enums.json'
+import plPersons from '@/locales/pl/persons.json'
+import plTasks from '@/locales/pl/tasks.json'
 import { app } from '@/manifest'
 
 export const resources = {
-  en: { translation: { common: enCommon, enums: enEnums } },
-  pl: { translation: { common: plCommon, enums: plEnums } },
+  en: { translation: { common: enCommon, enums: enEnums, persons: enPersons, tasks: enTasks } },
+  pl: { translation: { common: plCommon, enums: plEnums, persons: plPersons, tasks: plTasks } },
 } as const
 
 export type Language = keyof typeof resources

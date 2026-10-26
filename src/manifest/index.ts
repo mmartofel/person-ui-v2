@@ -95,7 +95,7 @@ export interface ResourceManifest {
  * Resource keys; each one is also the i18n namespace key (`<resource>.title`). No resources yet: the first one
  * replaces `never` with its key (`'orders'`), later ones extend the union (`'orders' | 'customers'`).
  */
-export type ResourceKey = never
+export type ResourceKey = 'persons' | 'tasks'
 
 interface AppManifest {
   /** Shown in the sidebar (its initials are the app mark), `<title>` and every page title. */

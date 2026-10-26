@@ -41,5 +41,7 @@ export const authFile = (user: TestUser) => `e2e/.auth/${user}.json`
 export async function openAs(page: Page, path = '/') {
   await page.goto(path)
   await page.waitForURL((url) => url.origin === 'http://localhost:5173' && !url.searchParams.has('code'))
-  await expect(page.getByRole('banner')).toBeVisible()
+  // waitForURL can pass before the redirect to the provider starts, so this wait covers the whole round trip
+  // (provider redirect, code exchange): slower than the default 5 s under the full parallel suite.
+  await expect(page.getByRole('banner')).toBeVisible({ timeout: 15_000 })
 }
