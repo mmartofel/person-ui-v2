@@ -113,7 +113,7 @@ export function RelationSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between font-normal', !value && 'text-muted-foreground', className)}
+          className={cn('w-full justify-between bg-transparent font-normal', !value && 'text-muted-foreground', className)}
         >
           <span className="truncate">{value ? name : (emptyLabel ?? t('common.form.chooseRecord'))}</span>
           <ChevronsUpDown aria-hidden className="opacity-50" />

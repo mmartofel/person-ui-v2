@@ -36,7 +36,8 @@ and ask only for the rest (app name, languages, role labels, brand colour, image
 Ask what is missing; never guess a URL, role or realm.
 
 ## 2. Configure
-- [ ] `ui-manifest.yaml` `app`: `name`, `languages`.
+- [ ] `ui-manifest.yaml` `app`: `name`, `languages`. The 1440 px app shell screenshots show the name: run
+      `npm run test:visual:update -- -g "app shell"` and check that only the name changed.
 - [ ] `package.json` `name` (and the two `name` fields at the top of `package-lock.json`) = the project name.
 - [ ] `.blueprint-version`: the first released version in `CHANGELOG.md` (the first `## [x.y.z]` heading, not
       `[Unreleased]`), without `v`. Then delete `CHANGELOG.md`: it is the blueprint's; upgrades read it from the
@@ -50,11 +51,13 @@ Ask what is missing; never guess a URL, role or realm.
 - [ ] Deployment: replace `crud-ui-blueprint` with the image name in `skaffold.yaml` (`build.artifacts[].image`)
       and `k8s/app.yaml` (`image`), and with the project name in the other names of `skaffold.yaml`, `k8s/`
       (Deployment, Service, ConfigMap) and `.circleci/config.yml` (job `image`). `k8s/configmap.yaml`: the OIDC values
-      and `API_UPSTREAM`. Check: `docker build` (or podman) and `kubectl kustomize k8s`.
+      and `API_UPSTREAM`; `k8s/ingress.example.yaml`: the `/api` backend is the API's Service (not `my-api`). Check:
+      `docker build` (or podman) and `kubectl kustomize k8s`.
 - [ ] `.env.local` from `.env.example`: `VITE_OIDC_*` (with the roles claim), `API_PROXY_TARGET`, `CONTRACT_SOURCE`,
       `E2E_*`.
 - [ ] `common.roles.<role>` labels in every `src/locales/<lang>/common.json`.
-- [ ] `README.md`: replace the template intro with the project's name and API; keep the commands.
+- [ ] `README.md`: replace the template intro (everything before "## Prerequisites") with the project's name and API;
+      keep the rest.
 - [ ] `npm run dev`, sign in as both users: the shell shows "No resources yet". The user menu says "No application
       roles" until a resource names the roles in its `permissions` (checked again in step 5).
 

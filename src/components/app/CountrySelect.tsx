@@ -42,7 +42,7 @@ export function CountrySelect({ value, onChange, allowEmpty, emptyLabel, ref, cl
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between font-normal', !value && 'text-muted-foreground', className)}
+          className={cn('w-full justify-between bg-transparent font-normal', !value && 'text-muted-foreground', className)}
         >
           <span className="truncate">
             {value ? countryName(value, language) : (emptyLabel ?? t('common.form.chooseCountry'))}

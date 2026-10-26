@@ -30,3 +30,23 @@ tasks: { list: listTasks, get: getTask, listKey: getListTasksQueryKey, getKey: g
 ```
 
 and the routes in `src/router.tsx`: `...personsRoutes, ...tasksRoutes,` before the `*` route.
+
+Persons is built first (tasks points to it), but its manifest names tasks in `detail.related` and one persons test
+creates a task: leave both out until tasks is built.
+
+With persons as the first resource, the `HOME` lines of `e2e/shell.spec.ts` became:
+
+```ts
+// the writer's home page
+await expect(page).toHaveURL(/\/persons/)
+await expect(page.getByRole('heading', { level: 1, name: 'Persons' })).toBeVisible()
+// the language switch (twice)
+await expect(page.getByRole('heading', { level: 1, name: 'Osoby' })).toBeVisible()
+// the sign-in callback
+await expect(page).toHaveURL('/persons')
+// the mobile menu sheet: navigation lists the resources, a link closes the sheet
+await expect(dialog.getByRole('navigation', { name: 'Main navigation' })).toBeVisible()
+await dialog.getByRole('link', { name: 'Persons' }).click()
+await expect(dialog).toBeHidden()
+await expect(page).toHaveURL('/persons')
+```

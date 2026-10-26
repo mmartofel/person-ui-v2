@@ -224,7 +224,9 @@ export function ResourceForm<TRecord extends VersionedRecord, TSchema extends z.
           </Button>
         </div>
       </form>
-      <UnsavedChangesGuard when={isDirty && savedId === undefined} />
+      {/* Mounted only while there is something to lose: a router allows one blocker, and a page may show two forms
+          (the gallery). */}
+      {isDirty && savedId === undefined && <UnsavedChangesGuard when />}
       <ConfirmDialog
         open={staleOpen}
         onOpenChange={setStaleOpen}

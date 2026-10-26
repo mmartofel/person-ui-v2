@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
@@ -67,10 +68,24 @@ function DetailView<T extends AnyRecord>({
     resource,
     remove,
     onDeleted: (deleted) => {
-      onDeleted(deleted)
+      deletedRecord.current = deleted
       navigate(listHref, { replace: true })
     },
   })
+  // The cache update waits until this page has unmounted: removing the query while the page (or the breadcrumbs)
+  // still shows the record would fetch the deleted record again (a 404).
+  const deletedRecord = useRef<T>(undefined)
+  const onDeletedRef = useRef(onDeleted)
+  useEffect(() => {
+    onDeletedRef.current = onDeleted
+  })
+  useEffect(
+    () => () => {
+      const deleted = deletedRecord.current
+      if (deleted) setTimeout(() => onDeletedRef.current(deleted))
+    },
+    [],
+  )
   const status = resource.detail.status
 
   return (

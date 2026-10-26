@@ -47,6 +47,8 @@ Ask for whichever is missing. Say whether it is a **new** resource or an **exist
       resource with relations) and renamed (wiring.md). The first resource also replaces `ResourceKey = never` and
       updates the lines marked `HOME` in `e2e/shell.spec.ts` (`/` now opens it instead of "No resources yet").
 - [ ] Routes spread into `src/router.tsx` before the `*` route.
+- [ ] A `detail.related` entry, or a test, that needs a resource not built yet waits until that resource is built
+      (the persons example names tasks in both: build persons without them, add them with tasks).
 - [ ] Unit tests for new generic code only; `src/i18n/locales.test.ts` must pass.
 - [ ] E2E `e2e/<key>.spec.ts` from `references/examples/<example>/<example>.spec.ts`: happy path plus at least one error case per changed flow
       (filters: URL state, reload, clear, mobile sheet). Run the whole suite: new fields can break old assertions.

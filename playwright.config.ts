@@ -23,8 +23,10 @@ export default defineConfig({
   projects: [
     // Signs in each demo user once; tests pick a role with `test.use({ storageState: authFile(user) })`.
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /gallery.*\.spec\.ts/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /gallery.*\.spec\.ts/ },
+    // Against the API and the OIDC provider. With resources, the full parallel suite (dev server, API and provider on
+    // one machine) is slower than the defaults allow: more time per assertion and per test.
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'], testIgnore: /gallery.*\.spec\.ts/, expect: { timeout: 10_000 }, timeout: 60_000 },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, dependencies: ['setup'], testIgnore: /gallery.*\.spec\.ts/, expect: { timeout: 10_000 }, timeout: 60_000 },
     // The component gallery needs no login or API: `npx playwright test --project=gallery` runs without .env.local
     // (functional and axe specs). Every list or role change re-renders the whole gallery page (about 0.7 s in dev
     // mode), which can pass the default 5 s under the full parallel suite: its assertions get more time.

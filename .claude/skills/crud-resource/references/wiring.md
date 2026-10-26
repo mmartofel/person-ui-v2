@@ -105,6 +105,9 @@ A removed field must leave the manifest, the locales and the tests; `npm test` a
   edit or delete existing records. When a relation input's label is a prefix of the related resource's title ("Author" / "Authors"),
   wait for the picker dialog to be hidden before asserting the input: its search box matches the same name. After adding fields, re-run the old tests: text matchers shared by many fields
   (e.g. "Not provided") become ambiguous; assert next to the field's label instead.
+- Quick list changes in a row (filter, chip, sort, clear): the URL changes before the page re-renders, and the next
+  change starts from the params of the last render. Between two changes wait for the rendered state (the chip, the
+  header's `aria-sort`, the input value, "Clear filters" hidden), not only `expectListParams`.
 - Accessibility: `expectAccessible(page)` (`e2e/support/a11y.ts`, axe; serious and critical violations fail) on every
   distinct page the spec opens (list, form, detail, empty list, reader view) and `expectAccessible(page, '[role=alertdialog]')`
   on the delete confirmation, as in the examples.

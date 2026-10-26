@@ -22,6 +22,8 @@ interface ConfirmDialogProps {
   /** While true both buttons are disabled; the caller closes the dialog when the action finishes. */
   pending?: boolean
   onConfirm: () => void
+  /** Focused when the dialog closes and the element that opened it is gone (e.g. a deleted row's menu). */
+  fallbackFocus?: () => void
 }
 
 export function ConfirmDialog({
@@ -34,6 +36,7 @@ export function ConfirmDialog({
   destructive = false,
   pending = false,
   onConfirm,
+  fallbackFocus,
 }: ConfirmDialogProps) {
   const { t } = useTranslation()
   // Opened from state, not from an AlertDialogTrigger, so Radix does not know where focus should return.
@@ -51,6 +54,9 @@ export function ConfirmDialog({
           if (target?.isConnected) {
             event.preventDefault()
             target.focus()
+          } else if (fallbackFocus) {
+            event.preventDefault()
+            fallbackFocus()
           }
         }}
       >

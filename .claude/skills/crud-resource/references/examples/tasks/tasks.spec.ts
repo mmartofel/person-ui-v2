@@ -163,6 +163,8 @@ test.describe('tasks as writer', () => {
     await expect(table.getByRole('row')).toHaveCount(2)
 
     await filters.getByRole('button', { name: 'Clear filters' }).click()
+    // The next filter change starts from the rendered params: wait until the clear has rendered (the button goes).
+    await expect(filters.getByRole('button', { name: 'Clear filters' })).toBeHidden()
     await filters.getByRole('combobox', { name: 'Priority' }).click()
     await page.getByRole('option', { name: 'Low' }).click()
     await expectListParams(page, { q: tag, priority: 'LOW' })

@@ -185,6 +185,11 @@ Everything else is generic and driven by the manifest. These are the only person
 | P1 | `VITE_*` variables are baked in at build time, so an image could not move between environments | the image writes `/config.js` from its environment at start (`docker/10-ui-runtime-config.envsh`); `src/config.ts` reads it, or `.env.local` in dev |
 | P1 | A CSP with `script-src 'self'` blocked the inline theme and language script of `index.html` | it became `/prepaint.js` (served and emitted by the Vite plugin from `scripts/prepaint.js`), so the CSP needs no hashes |
 | P1 | With a read-only root filesystem the nginx image only logged that it could not render the templates and started without the server (connection reset) | the entrypoint script fails when `/etc/nginx/conf.d` or `/tmp` is not writable; `k8s/app.yaml` mounts `emptyDir`s there |
+| V | The reference e2e specs were changed for the D3 look but never ran against an API in the blueprint: the mobile card tests asserted the subtitle inside the card link, which since D3 holds only the title | fixed in the examples (assert on the card's `<li>`); the first project built from a release runs them (Validation, #3) |
+| V | Quick list changes in a row lost one of them (a date re-filled right after its chip was removed, a filter picked right after another, two sort clicks, Clear filters then a filter): the URL changes before the page re-renders, and `setSearchParams` starts from the params of the last render | the specs wait for rendered state (input value, chip, `aria-sort`, "Clear filters" hidden) between changes; rule in `references/wiring.md` "Tests" |
+| V | `openAs` timed out on the banner under the full parallel suite: `waitForURL` passes before the redirect to the provider starts, so 5 s had to cover the OIDC round trip | 15 s for that wait; the desktop and mobile projects get 10 s per assertion and 60 s per test |
+| V | axe failed `color-contrast` on the delete dialog in every serial run: it ran while the dialog faded in | `expectAccessible` waits for finite animations first |
+| V | Deleting from a detail page fetched the deleted record again (404 in the console): the cache update removed the query of the still-mounted page | `ResourceDetail` navigates to the list and calls `onDeleted` once the page has unmounted (the navigate promise resolves before the new route renders) |
 
 `tasks/lessons.md` has no entries: there were no user corrections. The decisions the user made are in the table
 above and in the git log.
@@ -198,13 +203,21 @@ Known gaps, left as is:
     body-size line, unlike `EmptyState` (icon in a soft circle, `text-sm` muted line); `ErrorPage` is neither in
     `docs/DESIGN.md` nor in the gallery, so neither the screenshots nor the reviewer can compare it;
   - the collapsed sidebar's user menu shows only the initials, without a tooltip (the nav items have one);
-  - `gallery.spec.ts` "the reader sees no write actions" failed once in a full parallel run (the role switch
-    re-renders the whole gallery) and passed on every repeat.
+  - `gallery.spec.ts` "the reader sees no write actions" fails in some full parallel runs (3 of 20 parallel repeats;
+    20 of 20 serial repeats pass, the switch takes 0.6 s alone). In a failing run the detail's Delete goes at once
+    but the list's "New" link stays for the whole 15 s, although both read the same role; root cause not found.
+- **Open from the 1.1.0 Validation (person-ui-v2, #3):**
+  - console error "flushSync was called from inside a lifecycle method" when a checkbox is clicked while a picker's
+    popover (relation or country) is open or closing: the task form's Done after Assignee, and `/__gallery#form`.
+    Radix: the popover's DismissableLayer waits for the next click (`deferPointerDownOutside`) and the Checkbox's
+    hidden input dispatches a click from an effect. Behaviour is correct; report upstream to Radix;
+  - tasks: the `done` filter is labelled "State" ("Stan") while the column is "Done": kept, since the filter's options
+    are Open/Done.
 - **Open from the D3 (resource screens) review:**
   - the list table's frame is capped at the viewport height (for the sticky header), so with 20+ rows the table
     scrolls inside its card before the page does; kept as the documented design;
-  - the gallery shows two forms at once, so react-router warns "A router only supports one blocker at a time" on
-    list changes there (gallery only; the app has one form per route);
+  - ~~the gallery's two forms made react-router warn "A router only supports one blocker at a time"~~: fixed in 1.1.1
+    (a form registers its blocker only while it has unsaved changes);
   - the checkbox itself is 16 px; its label fills the 44 px row and toggles it (unchanged from before D3).
 - **Open from the D2 (app shell) review:**
   - on very wide screens (1920) the breadcrumbs start at the header's left padding, not at the centred content
@@ -269,6 +282,6 @@ Known gaps, left as is:
 - ~~Input types beyond text, date and select~~: number, textarea and checkbox done in 9b; an email keyboard
   (`type=email`) is still missing.
 - **A searchable-fields hint** for the search placeholder. The API decides what `q` matches.
-- **The app name.** "Person UI" is in `index.html` and `common.appName`/`documentTitle`, not in the manifest.
+- ~~The app name~~: in the manifest since D2 (`app.name`).
 - ~~Relations between resources~~: done in 9b (`input/format: relation`, relation filters, `detail.related`).
   Sorting by a relation column is not offered: the contract does not document a sort key for it.

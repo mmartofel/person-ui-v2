@@ -90,6 +90,7 @@ test.describe('persons as writer', () => {
     await expectAccessible(page)
   })
 
+  // Needs the tasks resource (a task keeps its assignee in use): add this test when tasks is built.
   test('the row menu deletes a person after confirmation, and a person still in use is kept', async ({ page }) => {
     const tag = `Row${unique()}`
     await openAs(page, '/persons')
@@ -225,6 +226,8 @@ test.describe('persons as writer', () => {
     await expect(page.getByText('1–10 of 11')).toBeVisible()
 
     await page.getByRole('button', { name: 'First name' }).click()
+    // The second click toggles the rendered sort: wait for the first one to render.
+    await expect(page.getByRole('columnheader', { name: /First name/ })).toHaveAttribute('aria-sort', 'ascending')
     await page.getByRole('button', { name: 'First name' }).click()
     await expectListParams(page, { q: tag, size: '10', sort: 'firstName,desc' })
     await expect(firstRow).toContainText('P10')
@@ -363,9 +366,14 @@ test.describe('persons as writer', () => {
     // A chip removes its filter.
     await page.getByRole('button', { name: 'Remove filter Available on: Jun 15, 2026' }).click()
     await expectListParams(page, { q: tag })
+    // The URL changes before the input re-renders: filling the same date into the stale input would be ignored.
+    await expect(filters.getByLabel('Available on')).toHaveValue('')
 
     // No match: the empty state says so and clears the filters.
     await filters.getByLabel('Available on').fill('2026-06-15')
+    // Wait until the page shows the date filter: a second change starts from the params of the last render,
+    // and the URL changes before that render.
+    await expect(page.getByRole('button', { name: 'Remove filter Available on: Jun 15, 2026' })).toBeVisible()
     await filters.getByRole('combobox', { name: 'Status' }).click()
     await page.getByRole('option', { name: 'Unavailable' }).click()
     await expect(page.getByText('No matching records')).toBeVisible()
@@ -434,7 +442,8 @@ test.describe('persons as writer', () => {
     await expect(sheet).toBeHidden()
 
     await expect(page.getByRole('link', { name: new RegExp(tag) })).toHaveCount(1)
-    await expect(page.getByRole('link', { name: `Sam ${tag}` })).toContainText('Unavailable')
+    // The card's link holds only the title (it covers the card); the subtitle is next to it in the list item.
+    await expect(page.getByRole('listitem').filter({ has: page.getByRole('link', { name: `Sam ${tag}` }) })).toContainText('Unavailable')
     await expect(page.getByRole('button', { name: /Filters.*1 active/ })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })
@@ -448,7 +457,8 @@ test.describe('persons as writer', () => {
 
     await page.goto(`/persons?q=${tag}`)
     const card = page.getByRole('link', { name: `Anna ${tag}` })
-    await expect(card).toContainText(`anna.${tag.toLowerCase()}@example.com`)
+    // The link holds only the title (it covers the card); the subtitle is next to it in the list item.
+    await expect(page.getByRole('listitem').filter({ has: card })).toContainText(`anna.${tag.toLowerCase()}@example.com`)
     await expect(page.getByRole('table')).toBeHidden()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 

@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { useState } from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 import { ApiError } from '@/api/fetcher'
@@ -43,6 +44,33 @@ describe('useDeleteRecord', () => {
   it('treats a 404 as deleted', async () => {
     const { onDeleted } = await confirmDelete(() => Promise.reject(new ApiError(404, 'Not Found')))
     expect(onDeleted).toHaveBeenCalled()
+  })
+
+  it('focuses the fallback when the control that opened the dialog is gone', async () => {
+    function Row() {
+      const [shown, setShown] = useState(true)
+      const deletion = useDeleteRecord({
+        resource: persons,
+        remove: async () => {},
+        onDeleted: () => setShown(false),
+        fallbackFocus: () => screen.getByRole('searchbox').focus(),
+      })
+      return (
+        <>
+          <input type="search" aria-label="Search" />
+          {shown && (
+            <button type="button" onClick={() => deletion.request(anna)}>
+              Open
+            </button>
+          )}
+          {deletion.dialog}
+        </>
+      )
+    }
+    render(<Row />)
+    await userEvent.click(screen.getByRole('button', { name: 'Open' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await waitFor(() => expect(screen.getByRole('searchbox')).toHaveFocus())
   })
 
   it('says when the record is still in use', async () => {

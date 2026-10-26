@@ -62,7 +62,6 @@ export function ResourceList<T extends AnyRecord>({
   const writer = canWrite(roles, resource)
   const { state, setPage, setSize, setSort, setQuery, setFilter, clearFilters, clampPage } = list
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const deletion = useDeleteRecord<T>({ resource, remove, onDeleted })
   const rows = query.data?.content ?? []
   const page = query.data?.page
   const total = page?.totalElements ?? 0
@@ -73,6 +72,8 @@ export function ResourceList<T extends AnyRecord>({
 
   // Empty-state actions disappear with the state they clear: keep keyboard focus in the toolbar (the search box).
   const focusSearch = () => toolbarRef.current?.querySelector<HTMLElement>('input[type=search]')?.focus()
+  // Deleting the last row removes the menu that opened the dialog: focus goes to the search box.
+  const deletion = useDeleteRecord<T>({ resource, remove, onDeleted, fallbackFocus: focusSearch })
   const newButton = (
     <Button asChild>
       <Link to={`${resource.route}/new`}>

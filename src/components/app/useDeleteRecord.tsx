@@ -13,6 +13,8 @@ export interface DeleteOptions<T extends AnyRecord> {
   remove: (record: T) => Promise<unknown>
   /** Updates the query cache after a delete (remove the detail query, invalidate the lists). */
   onDeleted: (record: T) => void
+  /** Focused after a delete when the control that opened the dialog went with the record (a list row). */
+  fallbackFocus?: () => void
 }
 
 /**
@@ -20,7 +22,7 @@ export interface DeleteOptions<T extends AnyRecord> {
  * already deleted it, the outcome the user wanted) the cache is updated and a toast shown; a failure toasts why
  * (`toastDeleteError`). Render `dialog` once.
  */
-export function useDeleteRecord<T extends AnyRecord>({ resource, remove, onDeleted }: DeleteOptions<T>) {
+export function useDeleteRecord<T extends AnyRecord>({ resource, remove, onDeleted, fallbackFocus }: DeleteOptions<T>) {
   const { t } = useTranslation()
   // The record stays set while the dialog animates out, so its title keeps the name.
   const [record, setRecord] = useState<T>()
@@ -57,6 +59,7 @@ export function useDeleteRecord<T extends AnyRecord>({ resource, remove, onDelet
       destructive
       pending={pending}
       onConfirm={() => void confirm()}
+      fallbackFocus={fallbackFocus}
     />
   )
 

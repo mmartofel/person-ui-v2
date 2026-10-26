@@ -4,7 +4,9 @@ import { authFile, fillLoginForm, isLoginPage, loginAs, openAs } from './support
 import { openUserMenu, switchLanguage } from './support/shell.ts'
 
 // The app shell, valid for a project without resources. When the first resource exists, `/` opens its list instead
-// of "No resources yet": update the expectations marked HOME (see the examples in .claude/skills/crud-resource).
+// of "No resources yet": update the expectations marked HOME. The first resource's route and title replace "No
+// resources yet" and `/`, and the menu sheet lists it (the persons version is in
+// .claude/skills/crud-resource/references/examples/README.md).
 
 // Every distinct page and open layer gets an axe check (`expectAccessible`).
 
@@ -56,7 +58,7 @@ test.describe('app shell', () => {
     await page.getByRole('button', { name: 'Sign in again' }).click()
     await fillLoginForm(page, 'reader')
 
-    // HOME: `/` opens the first resource.
+    // HOME
     await expect(page).toHaveURL('/persons')
     await expect(page.getByRole('banner')).toBeVisible()
   })

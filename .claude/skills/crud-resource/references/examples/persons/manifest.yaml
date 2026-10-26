@@ -41,6 +41,7 @@
       status: status
       # Records of another resource that point to this one, as a card under the detail: up to `limit` records
       # filtered by `filter=<id>`, and a link to the filtered list. Shown only to users who can read that resource.
+      # Needs the related resource: add this entry when tasks is built (persons comes first, tasks points to it).
       related:
         - { resource: tasks, filter: assigneeId, limit: 5 }
 
