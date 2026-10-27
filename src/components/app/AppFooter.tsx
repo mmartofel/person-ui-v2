@@ -12,7 +12,16 @@ const dotColour: Record<ApiState | 'checking', string> = {
 }
 
 /** The details of an API status: the status, the problem, the running and contract versions, the last check. */
-export function ApiStatusDetails({ status, checkedAt }: { status?: ApiStatus; checkedAt?: number }) {
+export function ApiStatusDetails({
+  status,
+  checkedAt,
+  contractVersion = __CONTRACT_VERSION__,
+}: {
+  status?: ApiStatus
+  checkedAt?: number
+  /** The gallery passes a fixed one, so its screenshots do not change with the project's contract. */
+  contractVersion?: string | null
+}) {
   const { t, i18n } = useTranslation()
   const state = status?.state ?? 'checking'
 
@@ -32,7 +41,7 @@ export function ApiStatusDetails({ status, checkedAt }: { status?: ApiStatus; ch
       <dt className="text-muted-foreground">{t('common.footer.apiVersionTerm')}</dt>
       <dd>{status?.versionSource === 'api' ? status.version : t('common.footer.notReported')}</dd>
       <dt className="text-muted-foreground">{t('common.footer.contractVersionTerm')}</dt>
-      <dd>{__CONTRACT_VERSION__ ?? t('common.footer.noContract')}</dd>
+      <dd>{contractVersion ?? t('common.footer.noContract')}</dd>
       {checkedAt ? (
         <>
           <dt className="text-muted-foreground">{t('common.footer.checkedTerm')}</dt>
@@ -61,14 +70,25 @@ export function ApiStatusIndicator({ status, checkedAt }: { status?: ApiStatus; 
           <span className="text-caption">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" side="top" className="w-88" aria-label={t('common.footer.statusTerm')}>
+      {/* Keeps the page gutter (16 px) on narrow screens and shrinks to the space left between it; clear of the footer. */}
+      <PopoverContent
+        align="end"
+        side="top"
+        sideOffset={12}
+        collisionPadding={16}
+        className="w-88 max-w-(--radix-popover-content-available-width)"
+        aria-label={t('common.footer.statusTerm')}
+      >
         <ApiStatusDetails status={status} checkedAt={checkedAt} />
       </PopoverContent>
     </Popover>
   )
 }
 
-/** Below the page: the blueprint release on the left, the API version and status on the right. */
+/**
+ * Sticks to the bottom of the screen at `--app-footer-height` (src/index.css): the blueprint release on the left, the
+ * API version and status on the right. One line: the release truncates first.
+ */
 export function AppFooter() {
   const { t } = useTranslation()
   const { data: status, dataUpdatedAt } = useApiStatus()
@@ -79,9 +99,9 @@ export function AppFooter() {
     : t('common.footer.apiVersionUnknown')
 
   return (
-    <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t bg-background px-4 py-1 text-caption text-muted-foreground md:px-6 lg:px-8">
-      <span>{t('common.footer.blueprint', { version: __BLUEPRINT_VERSION__ })}</span>
-      <div className="ml-auto flex items-center gap-2">
+    <footer className="sticky bottom-0 z-30 flex h-(--app-footer-height) items-center justify-between gap-4 border-t bg-background px-4 text-caption text-muted-foreground md:px-6 lg:px-8">
+      <span className="min-w-0 truncate">{t('common.footer.blueprint', { version: __BLUEPRINT_VERSION__ })}</span>
+      <div className="flex shrink-0 items-center gap-2">
         <span>{version}</span>
         <ApiStatusIndicator status={status} checkedAt={dataUpdatedAt || undefined} />
       </div>

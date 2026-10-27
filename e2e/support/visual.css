@@ -1,7 +1,9 @@
 /* Injected while the visual spec takes a screenshot (`stylePath`). A section taller than the viewport is captured
-   beyond it, where viewport-sticky bars would be drawn over the middle of the section: the app header and the
-   mobile form action bar go back into the flow. Sticky table headers and columns scroll in their own frame and stay. */
+   beyond it, where viewport-sticky bars would be drawn over the middle of the section: the app header, the app
+   footer and the mobile form action bar go back into the flow. Sticky table headers and columns scroll in their own
+   frame and stay. */
 header.sticky.top-0,
-form .sticky.bottom-0 {
+footer.sticky.bottom-0,
+form .sticky {
   position: static !important;
 }

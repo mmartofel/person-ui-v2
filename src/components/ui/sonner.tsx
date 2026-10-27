@@ -20,6 +20,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme}
       containerAriaLabel={t("common.notifications")}
       className="toaster group"
+      // Local change: toasts sit above the app footer, which sticks to the bottom (--app-footer-height, src/index.css).
+      offset={{ bottom: "calc(var(--app-footer-height) + 24px)" }}
+      mobileOffset={{ bottom: "calc(var(--app-footer-height) + 16px)" }}
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,

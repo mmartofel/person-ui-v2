@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useLocation } from 'react-router'
+import { Outlet, ScrollRestoration, useLocation } from 'react-router'
 import { Separator } from '@/components/ui/separator'
 import { isMac, SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -76,11 +76,20 @@ export function AppShell() {
     <SidebarProvider open={open} onOpenChange={onOpenChange}>
       <a
         href="#main"
+        // No #main history entry: on a form with unsaved changes the blocker would meet it as an unknown navigation.
+        onClick={(event) => {
+          event.preventDefault()
+          const main = document.getElementById('main')
+          main?.focus({ preventScroll: true })
+          main?.scrollIntoView()
+        }}
         className="sr-only z-50 rounded-md bg-popover text-popover-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:shadow-md focus:ring-[3px] focus:ring-ring focus:outline-none"
       >
         {t('common.skipToContent')}
       </a>
 
+      {/* A new page opens at the top; back and forward restore the position (list state keeps it, listState.ts). */}
+      <ScrollRestoration />
       <AppSidebar />
 
       <SidebarInset className="min-w-0">

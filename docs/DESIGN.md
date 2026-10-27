@@ -97,13 +97,20 @@ Dialog titles use `text-section-title`.
 - **Header** (`h-14`, `bg-background`, bottom border, sticky): the sidebar toggle and the breadcrumbs, list › record
   (by the manifest's `display`) › edit. Below `md` only the last two crumbs. Page actions stay in `PageHeader`.
 - **Content**: `px-4 py-6`, `md:px-6`, `lg:px-8`, centred with a max width by page kind: lists `max-w-7xl`,
-  detail `max-w-6xl`, forms `max-w-4xl`.
-- **Footer** (`AppFooter`, `bg-background`, top border, not sticky, so it never covers a form's sticky actions): the
-  content's horizontal padding, `text-caption text-muted-foreground`. Left the blueprint release, right the API
+  detail `max-w-6xl`, forms `max-w-4xl`. A new page opens at the top, back and forward restore the position
+  (`ScrollRestoration` in `AppShell`). A list's search, sort, filters and page size keep it; another page of the list
+  scrolls the list card to the top and focuses it (a region named after the resource), so keyboard paging never leaves
+  focus off screen. Mobile cards opt out of scroll anchoring, so new results do not jump the page.
+- **Footer** (`AppFooter`, `bg-background`, top border): sticks to the bottom of the screen, so it is always in
+  view, one line high (`--app-footer-height` in `src/index.css`: 52 px below `md`, 40 px from `md`); the form's mobile
+  action bar and the toasts sit above it. The document's scroll padding (same file) keeps a focused element clear of
+  the header, the footer and, below `md`, the form's action bar; below `md` a focused field scrolls clear with its
+  label and message (`data-form-field`). The content's horizontal padding, `text-caption text-muted-foreground`. Left the blueprint release, right the API
   version (marked "contract" when the API does not report its own) and the API status: a 8 px dot (`success`,
   `warning`, `destructive`; `muted-foreground` while checking) with the status name, so colour is never the only
   signal. It is a ghost button (44 px below `md`) that opens a popover with the status, the problem, the running and
-  contract versions and the time of the last check.
+  contract versions and the time of the last check; the popover keeps the 16 px page gutter on narrow screens. The
+  blueprint release truncates first when the line is too narrow.
 - Menu buttons are 44 px high, also as icons, so the sidebar works on touch screens from `lg` too; the sheet's open
   and close buttons and the breadcrumb links are 44 px wherever they are the touch path (below `lg` / `md`).
 

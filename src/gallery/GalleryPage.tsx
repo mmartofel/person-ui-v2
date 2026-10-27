@@ -533,7 +533,7 @@ function FooterSection() {
   return (
     <Section
       id="footer"
-      note="The API status in the footer: a dot with its name, the button opens versions and the problem (below, open). Checked every 30 s from /actuator/health and /actuator/info."
+      note="The API status in the footer: a dot with its name, the button opens versions and the problem (below, open). Health is checked every 30 s from /actuator/health, the version read from /actuator/info."
     >
       <Card className="gap-0 py-0">
         <CardContent className="flex flex-wrap items-center gap-x-8 gap-y-2 py-3 text-caption text-muted-foreground">
@@ -547,7 +547,7 @@ function FooterSection() {
       </Card>
       {/* The degraded button's popover, shown open (its classes from components/ui/popover.tsx). */}
       <div className="mt-4 w-full max-w-88 rounded-md border bg-popover p-4 text-popover-foreground shadow-md">
-        <ApiStatusDetails status={apiStatuses[1][1]} checkedAt={checkedAt} />
+        <ApiStatusDetails status={apiStatuses[1][1]} checkedAt={checkedAt} contractVersion="3.4.2" />
       </div>
     </Section>
   )

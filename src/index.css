@@ -73,4 +73,23 @@
     /* Inter alternates that tell l, I and 1 apart in record data. */
     font-feature-settings: 'cv05', 'cv08';
     }
+  /* The app footer's height (AppFooter): it sticks to the bottom of the screen, so the form's mobile action bar and
+     the toasts sit above it. 44 px status button below md, 32 px from md, plus the top border. */
+  :root {
+    --app-footer-height: 3.25rem;
+    @media (width >= 48rem) {
+      --app-footer-height: 2.5rem;
+    }
+  }
+  /* Focus and in-page scrolling stop clear of the sticky header (h-14), the footer and, below md, a form's sticky
+     action bar (`data-form-actions`, about 4.3rem). */
+  html {
+    scroll-padding-top: 3.5rem;
+    scroll-padding-bottom: var(--app-footer-height);
+    @media (width < 48rem) {
+      &:has([data-form-actions]) {
+        scroll-padding-bottom: calc(var(--app-footer-height) + 4.5rem);
+      }
+    }
+  }
 }

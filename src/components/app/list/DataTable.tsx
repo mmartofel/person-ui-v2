@@ -195,7 +195,9 @@ export function DataTable<T extends Row>({ resource, rows, sort, onSortChange, g
         </Table>
       </div>
 
-      <ul className="divide-y md:hidden">
+      {/* No scroll anchoring: cards are keyed by record, so after a filter or search the browser would follow a
+          card that moved up the new results and jump the page. */}
+      <ul className="divide-y [overflow-anchor:none] md:hidden">
         {rows.map((row) => (
           // The title link covers the whole row (a stretched link); the actions button sits above it, not inside.
           <li key={getRowHref(row)} className="relative flex items-start gap-2 px-4 py-3 hover:bg-accent">

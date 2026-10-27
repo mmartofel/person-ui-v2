@@ -62,6 +62,7 @@ export function ResourceList<T extends AnyRecord>({
   const writer = canWrite(roles, resource)
   const { state, setPage, setSize, setSort, setQuery, setFilter, clearFilters, clampPage } = list
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const rows = query.data?.content ?? []
   const page = query.data?.page
   const total = page?.totalElements ?? 0
@@ -72,6 +73,13 @@ export function ResourceList<T extends AnyRecord>({
 
   // Empty-state actions disappear with the state they clear: keep keyboard focus in the toolbar (the search box).
   const focusSearch = () => toolbarRef.current?.querySelector<HTMLElement>('input[type=search]')?.focus()
+  // Another page starts at the top of the list, and focus goes with it: the pagination button would stay focused
+  // off screen, and a second Enter would page on unseen.
+  const changePage = (next: number) => {
+    setPage(next)
+    listRef.current?.scrollIntoView({ block: 'start' })
+    listRef.current?.focus({ preventScroll: true })
+  }
   // Arriving from a deleted record's detail page: focus the search box, not the page body. The state is cleared, so a
   // reload or Back does not move focus again.
   const location = useLocation()
@@ -136,7 +144,13 @@ export function ResourceList<T extends AnyRecord>({
   return (
     <>
       <PageHeader title={tDynamic(t, `${resource.key}.title`)} actions={writer && newButton} />
-      <Card className="gap-0 overflow-hidden py-0">
+      <Card
+        ref={listRef}
+        tabIndex={-1}
+        role="region"
+        aria-label={tDynamic(t, `${resource.key}.title`)}
+        className="gap-0 overflow-hidden py-0 outline-none"
+      >
         <div ref={toolbarRef} className="flex flex-col gap-3 border-b px-4 py-3 md:px-6 md:py-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-0 flex-1 md:flex-none md:basis-80">
@@ -197,7 +211,7 @@ export function ResourceList<T extends AnyRecord>({
                 pageSizes={resource.list.pageSizes}
                 totalElements={total}
                 totalPages={totalPages}
-                onPageChange={setPage}
+                onPageChange={changePage}
                 onSizeChange={setSize}
               />
             </div>

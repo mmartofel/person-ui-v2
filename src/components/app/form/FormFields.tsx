@@ -164,7 +164,7 @@ function FormField<T extends FieldValues, TOut extends FieldValues>({
   } else if (config.input === 'checkbox') {
     // The label sits next to the box and fills the 44px-high row, so the whole row toggles it.
     return (
-      <div className="flex min-w-0 flex-col gap-2">
+      <div data-form-field className="flex min-w-0 flex-col gap-2">
         <div className="flex items-center gap-3">
           <Checkbox
             {...a11y}
@@ -233,7 +233,7 @@ function FormField<T extends FieldValues, TOut extends FieldValues>({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div data-form-field className="flex min-w-0 flex-col gap-2">
       <Label htmlFor={id}>
         {tDynamic(t, fieldLabelKey(resource.key, name))}
         {required && (
