@@ -24,7 +24,7 @@ resources:
 
     list:
       defaultSort: lastName,asc
-      pageSize: 20
+      pageSize: 10
       pageSizes: [10, 20, 50]
       # The table (from md) links each row to its detail page through the first column. Below md each row is a
       # card titled by `display`; `mobile: subtitle` columns are shown under the title, the others only in the table.
@@ -89,7 +89,7 @@ resources:
 
     list:
       defaultSort: dueDate,asc
-      pageSize: 20
+      pageSize: 10
       pageSizes: [10, 20, 50]
       columns:
         - { field: title,    sortable: true }

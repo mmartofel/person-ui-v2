@@ -23,14 +23,14 @@ describe('AppFooter', () => {
     renderFooter({ state: 'available', version: '3.5.0', versionSource: 'api' })
 
     const footer = screen.getByRole('contentinfo')
-    expect(footer).toHaveTextContent(`Blueprint ${__BLUEPRINT_VERSION__}`)
+    expect(footer).toHaveTextContent(`Blueprint version used to generate UI: ${__BLUEPRINT_VERSION__}`)
     expect(await screen.findByRole('button', { name: 'API status: Available' })).toBeInTheDocument()
-    expect(footer).toHaveTextContent('API 3.5.0')
+    expect(footer).toHaveTextContent('API version connected: 3.5.0')
   })
 
   it('marks a version taken from the contract', async () => {
     renderFooter({ state: 'available', version: '3.4.2', versionSource: 'contract' })
-    expect(await screen.findByText('API 3.4.2 (contract)')).toBeInTheDocument()
+    expect(await screen.findByText('API version connected: 3.4.2 (contract)')).toBeInTheDocument()
   })
 })
 

@@ -86,9 +86,9 @@ test.describe('app shell as reader', () => {
     await openAs(page, '/no-such-page')
 
     const footer = page.getByRole('contentinfo')
-    await expect(footer).toContainText(/Blueprint \d+\.\d+\.\d+/)
+    await expect(footer).toContainText(/Blueprint version used to generate UI: \d+\.\d+\.\d+/)
     // The running version from /actuator/info, the contract's marked "(contract)", or none in the blueprint itself.
-    await expect(footer).toContainText(/API \d+\.\d+\.\d+|API version unknown/)
+    await expect(footer).toContainText(/API version connected: \d+\.\d+\.\d+|API version unknown/)
     await footer.getByRole('button', { name: 'API status: Available' }).click()
     const details = page.getByRole('dialog', { name: 'API status' })
     await expect(details).toContainText('Last checked')

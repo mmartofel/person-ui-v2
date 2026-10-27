@@ -163,9 +163,9 @@
     "emptyText": "This app has no screens yet. Add a resource to <code>ui-manifest.yaml</code> with the <code>crud-resource</code> skill, or start with <code>crud-ui-init</code>."
   },
   "footer": {
-    "blueprint": "Blueprint {{version}}",
-    "apiVersion": "API {{version}}",
-    "apiContractVersion": "API {{version}} (contract)",
+    "blueprint": "Blueprint version used to generate UI: {{version}}",
+    "apiVersion": "API version connected: {{version}}",
+    "apiContractVersion": "API version connected: {{version}} (contract)",
     "apiVersionUnknown": "API version unknown",
     "statusLabel": "API status: {{status}}",
     "statusTerm": "API status",
