@@ -161,5 +161,33 @@
   "home": {
     "emptyTitle": "No resources yet",
     "emptyText": "This app has no screens yet. Add a resource to <code>ui-manifest.yaml</code> with the <code>crud-resource</code> skill, or start with <code>crud-ui-init</code>."
+  },
+  "footer": {
+    "blueprint": "Blueprint {{version}}",
+    "apiVersion": "API {{version}}",
+    "apiContractVersion": "API {{version}} (contract)",
+    "apiVersionUnknown": "API version unknown",
+    "statusLabel": "API status: {{status}}",
+    "statusTerm": "API status",
+    "problemTerm": "Problem",
+    "apiVersionTerm": "Running API version",
+    "contractVersionTerm": "Contract version",
+    "checkedTerm": "Last checked",
+    "notReported": "Not reported by the API",
+    "noContract": "No contract yet",
+    "status": {
+      "available": "Available",
+      "degraded": "Degraded",
+      "unavailable": "Unavailable",
+      "checking": "Checking…"
+    },
+    "problem": {
+      "network": "The API cannot be reached.",
+      "timeout": "The API did not answer within 5 seconds.",
+      "noHealth": "No API answers at /actuator/health ({{detail}}).",
+      "down": "Not working: {{detail}}.",
+      "unexpected": "Unexpected status response ({{detail}}).",
+      "incompatible": "This API version is not compatible with contract {{detail}} the screens were built for."
+    }
   }
 }

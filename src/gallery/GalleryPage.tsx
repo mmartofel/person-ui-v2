@@ -4,9 +4,11 @@ import { FilterX, Pencil, Plus, SearchX, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ApiError } from '@/api/fetcher'
+import type { ApiStatus } from '@/api/status'
 import { sourceOf, type AnyRecord } from '@/api/sources'
 import { useRoles } from '@/auth'
 import { ConfirmDialog } from '@/components/app/ConfirmDialog'
+import { ApiStatusDetails, ApiStatusIndicator } from '@/components/app/AppFooter'
 import { DataState } from '@/components/app/DataState'
 import { DetailSkeleton } from '@/components/app/DetailSkeleton'
 import { ResourceDetail } from '@/components/app/ResourceDetail'
@@ -42,6 +44,7 @@ const sections = [
   ['form', 'Form'],
   ['states', 'States'],
   ['dialogs', 'Confirm dialog and toasts'],
+  ['footer', 'Footer: API status'],
 ] as const
 
 export function GalleryPage() {
@@ -86,6 +89,7 @@ export function GalleryPage() {
       <FormSection />
       <StatesSection />
       <DialogsSection />
+      <FooterSection />
     </div>
   )
 }
@@ -512,6 +516,39 @@ function DialogsSection() {
         pending={pending}
         onConfirm={confirm}
       />
+    </Section>
+  )
+}
+
+// The shell's footer below shows the gallery's fixture status (src/gallery/register.ts); here every state.
+const apiStatuses: [string, ApiStatus | undefined][] = [
+  ['Available', { state: 'available', version: '3.4.2', versionSource: 'api' }],
+  ['Degraded', { state: 'degraded', version: '3.4.2', versionSource: 'api', problem: { key: 'down', detail: 'db: DOWN' } }],
+  ['Unavailable', { state: 'unavailable', version: '3.4.2', versionSource: 'contract', problem: { key: 'network' } }],
+  ['Checking', undefined],
+]
+const checkedAt = Date.UTC(2026, 9, 27, 9, 30)
+
+function FooterSection() {
+  return (
+    <Section
+      id="footer"
+      note="The API status in the footer: a dot with its name, the button opens versions and the problem (below, open). Checked every 30 s from /actuator/health and /actuator/info."
+    >
+      <Card className="gap-0 py-0">
+        <CardContent className="flex flex-wrap items-center gap-x-8 gap-y-2 py-3 text-caption text-muted-foreground">
+          {apiStatuses.map(([title, status]) => (
+            <div key={title} className="flex items-center gap-2">
+              <span className="sr-only">{title}:</span>
+              <ApiStatusIndicator status={status} checkedAt={status && checkedAt} />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+      {/* The degraded button's popover, shown open (its classes from components/ui/popover.tsx). */}
+      <div className="mt-4 w-full max-w-88 rounded-md border bg-popover p-4 text-popover-foreground shadow-md">
+        <ApiStatusDetails status={apiStatuses[1][1]} checkedAt={checkedAt} />
+      </div>
     </Section>
   )
 }

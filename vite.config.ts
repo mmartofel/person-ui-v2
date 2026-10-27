@@ -2,7 +2,7 @@
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { parse } from 'yaml'
 
@@ -52,11 +52,31 @@ function manifestHtmlPlugin(): Plugin {
   }
 }
 
-const apiProxy = (target?: string) => (target ? { '/api': target } : undefined)
+// Versions for the footer: the blueprint release (`.blueprint-version` in a project, the newest release in
+// CHANGELOG.md in the blueprint itself) and the contract the generated client was built from.
+function blueprintVersion(): string {
+  if (existsSync('.blueprint-version')) return readFileSync('.blueprint-version', 'utf8').trim().replace(/^v/, '')
+  if (!existsSync('CHANGELOG.md')) return 'unknown'
+  return /^## \[(\d+\.\d+\.\d+)\]/m.exec(readFileSync('CHANGELOG.md', 'utf8'))?.[1] ?? 'unknown'
+}
+
+function contractVersion(): string | null {
+  if (!existsSync('contract/openapi.json')) return null
+  const version = (JSON.parse(readFileSync('contract/openapi.json', 'utf8')) as { info?: { version?: unknown } }).info?.version
+  return typeof version === 'string' ? version : null
+}
+
+// /api plus the two public Actuator endpoints of the footer's API status (docs/API-CONTRACT.md "Status endpoints").
+const apiProxy = (target?: string) =>
+  target ? { '/api': target, '/actuator/health': target, '/actuator/info': target } : undefined
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss(), yamlPlugin(), manifestHtmlPlugin()],
+  define: {
+    __BLUEPRINT_VERSION__: JSON.stringify(blueprintVersion()),
+    __CONTRACT_VERSION__: JSON.stringify(contractVersion()),
+  },
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, './src') },
   },

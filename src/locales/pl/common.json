@@ -163,5 +163,33 @@
   "home": {
     "emptyTitle": "Brak zasobów",
     "emptyText": "Ta aplikacja nie ma jeszcze ekranów. Dodaj zasób do <code>ui-manifest.yaml</code> skillem <code>crud-resource</code> albo zacznij od <code>crud-ui-init</code>."
+  },
+  "footer": {
+    "blueprint": "Blueprint {{version}}",
+    "apiVersion": "API {{version}}",
+    "apiContractVersion": "API {{version}} (kontrakt)",
+    "apiVersionUnknown": "Wersja API nieznana",
+    "statusLabel": "Stan API: {{status}}",
+    "statusTerm": "Stan API",
+    "problemTerm": "Problem",
+    "apiVersionTerm": "Działająca wersja API",
+    "contractVersionTerm": "Wersja kontraktu",
+    "checkedTerm": "Ostatnie sprawdzenie",
+    "notReported": "API jej nie podaje",
+    "noContract": "Brak kontraktu",
+    "status": {
+      "available": "Dostępne",
+      "degraded": "Działa z błędami",
+      "unavailable": "Niedostępne",
+      "checking": "Sprawdzanie…"
+    },
+    "problem": {
+      "network": "Nie można połączyć się z API.",
+      "timeout": "API nie odpowiedziało w ciągu 5 sekund.",
+      "noHealth": "Pod /actuator/health nie odpowiada żadne API ({{detail}}).",
+      "down": "Nie działa: {{detail}}.",
+      "unexpected": "Nieoczekiwana odpowiedź o stanie ({{detail}}).",
+      "incompatible": "Ta wersja API nie jest zgodna z kontraktem {{detail}}, dla którego zbudowano ekrany."
+    }
   }
 }

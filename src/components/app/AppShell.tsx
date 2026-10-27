@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils'
 import { resources } from '@/manifest'
 import { AppBreadcrumbs } from './AppBreadcrumbs'
+import { AppFooter } from './AppFooter'
 import { AppSidebar } from './AppSidebar'
 import { ErrorBoundary } from './ErrorBoundary'
 import { resourcePage, type PageKind } from './resourcePage'
@@ -59,7 +60,7 @@ function NavTrigger() {
   )
 }
 
-/** Sidebar (navigation, user menu) plus a header with breadcrumbs and the page. */
+/** Sidebar (navigation, user menu) plus a header with breadcrumbs, the page, and a footer with versions and API status. */
 export function AppShell() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
@@ -99,6 +100,7 @@ export function AppShell() {
             </ErrorBoundary>
           </div>
         </main>
+        <AppFooter />
       </SidebarInset>
     </SidebarProvider>
   )

@@ -12,6 +12,7 @@ export const sections = [
   ['form', 'Form'],
   ['states', 'States'],
   ['dialogs', 'Confirm dialog and toasts'],
+  ['footer', 'Footer: API status'],
 ] as const
 
 export type GalleryTheme = 'light' | 'dark'

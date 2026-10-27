@@ -85,6 +85,11 @@ this API's OpenAPI contract, so the contract rules in `docs/API-CONTRACT.md` are
   types are not optional; responses are documented as `application/json` (`springdoc.default-produces-media-type`).
 - Unexpected exceptions become a 500 Problem Detail with a generic `detail` (logged, never the exception message).
 - The OpenAPI `info.version` comes from Maven `build-info`; never hard-code it.
+- Status endpoints for the UI's footer (`docs/API-CONTRACT.md` "Status endpoints"): Actuator exposes `health,info`
+  (`management.endpoints.web.exposure.include`), `management.endpoint.health.show-components: always` with details
+  left at `never`, and `build-info` gives `/actuator/info` its `build.version`. `SecurityConfig` permits
+  `/actuator/health/**` and `/actuator/info`; nothing else under `/actuator` is public. An integration test asserts
+  both answer without a token and that `build.version` equals `info.version`.
 - The contract is exported to `contract/openapi.json` by an integration test (`exportOpenApiContract`), which writes the
   file first and asserts afterwards, so a failing assertion still leaves the file to inspect. After any API change run
   `mvn clean verify` and commit the regenerated file (CI fails otherwise).

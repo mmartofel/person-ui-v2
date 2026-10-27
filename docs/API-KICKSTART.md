@@ -35,9 +35,9 @@ rules are requirements, because a web UI is generated from our OpenAPI contract)
    never guess the groupId or the realm.
 2. Fill in the Project section of CLAUDE.md and remove its template comment.
 3. In plan mode, plan and then build in this order, one commit-sized step at a time:
-   a. Skeleton: pom.xml (Java 21, latest Spring Boot 4.x, version 1.0.0, build-info), docker-compose.yml (PostgreSQL,
+   a. Skeleton: pom.xml (Java 21, latest Spring Boot 4.x, version 1.0.0, build-info, actuator), docker-compose.yml (PostgreSQL,
       Keycloak), k8s/ (app, postgres, keycloak, kustomization with a realm configMapGenerator), k8s/realm.json as
-      described in CLAUDE.md "Keycloak", application.yml, .circleci/config.yml (mvn -B verify, then fail if
+      described in CLAUDE.md "Keycloak", application.yml (with the status endpoints of CLAUDE.md), .circleci/config.yml (mvn -B verify, then fail if
       contract/ has uncommitted changes), .gitignore, tasks/lessons.md.
    b. Shared infrastructure, modelled on the reference API https://github.com/mmartofel/spring-person-api-claude
       (commit f98300e, package pl.piomin.services): config/SecurityConfig, config/OpenApiConfig (problem responses

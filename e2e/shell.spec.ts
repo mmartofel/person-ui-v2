@@ -82,6 +82,38 @@ test.describe('app shell as reader', () => {
     await expect(page).toHaveURL('/')
   })
 
+  test('the footer shows the blueprint release and the API as available', async ({ page }) => {
+    await openAs(page, '/no-such-page')
+
+    const footer = page.getByRole('contentinfo')
+    await expect(footer).toContainText(/Blueprint \d+\.\d+\.\d+/)
+    // The running version from /actuator/info, the contract's marked "(contract)", or none in the blueprint itself.
+    await expect(footer).toContainText(/API \d+\.\d+\.\d+|API version unknown/)
+    await footer.getByRole('button', { name: 'API status: Available' }).click()
+    const details = page.getByRole('dialog', { name: 'API status' })
+    await expect(details).toContainText('Last checked')
+    await expectAccessible(page, '[data-slot=popover-content]')
+  })
+
+  test('the footer names what is down, and an unreachable API', async ({ page }) => {
+    await page.route('/actuator/health', (route) =>
+      route.fulfill({ status: 503, json: { status: 'DOWN', components: { db: { status: 'DOWN' }, ping: { status: 'UP' } } } }),
+    )
+    await openAs(page, '/no-such-page')
+
+    const footer = page.getByRole('contentinfo')
+    await footer.getByRole('button', { name: 'API status: Degraded' }).click()
+    await expect(page.getByRole('dialog', { name: 'API status' })).toContainText('Not working: db: DOWN.')
+    await expectAccessible(page)
+    await page.keyboard.press('Escape')
+
+    await page.unroute('/actuator/health')
+    await page.route('/actuator/health', (route) => route.abort())
+    await page.reload()
+    await footer.getByRole('button', { name: 'API status: Unavailable' }).click()
+    await expect(page.getByRole('dialog', { name: 'API status' })).toContainText('The API cannot be reached.')
+  })
+
   test('on desktop the sidebar collapses to icons, by button or Ctrl+B, and stays collapsed', async ({ page, isMobile }) => {
     test.skip(isMobile, 'the sidebar collapses from lg')
     await openAs(page, '/no-such-page')

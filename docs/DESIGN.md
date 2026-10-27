@@ -98,6 +98,12 @@ Dialog titles use `text-section-title`.
   (by the manifest's `display`) › edit. Below `md` only the last two crumbs. Page actions stay in `PageHeader`.
 - **Content**: `px-4 py-6`, `md:px-6`, `lg:px-8`, centred with a max width by page kind: lists `max-w-7xl`,
   detail `max-w-6xl`, forms `max-w-4xl`.
+- **Footer** (`AppFooter`, `bg-background`, top border, not sticky, so it never covers a form's sticky actions): the
+  content's horizontal padding, `text-caption text-muted-foreground`. Left the blueprint release, right the API
+  version (marked "contract" when the API does not report its own) and the API status: a 8 px dot (`success`,
+  `warning`, `destructive`; `muted-foreground` while checking) with the status name, so colour is never the only
+  signal. It is a ghost button (44 px below `md`) that opens a popover with the status, the problem, the running and
+  contract versions and the time of the last check.
 - Menu buttons are 44 px high, also as icons, so the sidebar works on touch screens from `lg` too; the sheet's open
   and close buttons and the breadcrumb links are 44 px wherever they are the touch path (below `lg` / `md`).
 

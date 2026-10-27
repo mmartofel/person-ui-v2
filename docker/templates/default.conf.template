@@ -45,6 +45,18 @@ server {
         proxy_set_header X-Forwarded-Host $host;
     }
 
+    # The two public Actuator endpoints of the footer's API status (docs/API-CONTRACT.md "Status endpoints"); no
+    # other /actuator path is exposed.
+    location ~ ^/actuator/(health|info)$ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_hide_header Content-Security-Policy;
+        proxy_hide_header X-Content-Type-Options;
+        proxy_hide_header Referrer-Policy;
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-store";
+        include /etc/nginx/conf.d/security-headers.inc;
+    }
+
     # Liveness and readiness probe.
     location = /healthz {
         access_log off;

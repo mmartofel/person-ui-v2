@@ -158,6 +158,9 @@ Port 5173 locally because the development OIDC client only accepts redirects the
 What the image serves:
 - `/assets/*` (hashed): cached for a year, `immutable`; a missing file is a 404. `index.html`, `/config.js` and
   `/prepaint.js` are `no-cache`; any other path falls back to `index.html` (client routes). `/healthz` for probes.
+- `/actuator/health` and `/actuator/info` (only these two) are proxied to `API_UPSTREAM` as well, `no-store`: the
+  footer's API status and running version ([docs/API-CONTRACT.md](docs/API-CONTRACT.md) "Status endpoints"). An
+  Ingress that routes only `/api` to the API leaves them to the UI's nginx, which forwards them.
 - Security headers on every response: `Content-Security-Policy` (`script-src 'self'`; `connect-src 'self'` plus the
   origin of `OIDC_AUTHORITY`; `frame-ancestors 'none'`; `style-src` allows inline styles, which Radix and sonner add),
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`. They are in

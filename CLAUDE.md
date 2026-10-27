@@ -138,7 +138,9 @@ A new Spring Boot API for this UI starts from `docs/API-KICKSTART.md`; never han
   formatted with `Intl` in the current language. Validation messages are translated through one global
   Zod error map, so generated schemas need no per-field messages.
 - Responsive: mobile first. Check 375px, 768px and 1440px.
-  - App shell (`AppShell`, `AppSidebar`): sidebar from `lg`, a sheet below it; layout in `docs/DESIGN.md` "App shell".
+  - App shell (`AppShell`, `AppSidebar`, `AppFooter`): sidebar from `lg`, a sheet below it; layout in `docs/DESIGN.md`
+    "App shell". The footer's API status reads `/actuator/health` and `/actuator/info` (`src/api/status.ts`; never
+    through `fetcher`, a 401 there must not log the user out).
   - Lists: table from `md`, cards below `md` (titled by the manifest's `display`; columns marked `mobile: subtitle` below it).
     A table wider than the screen scrolls inside its own frame, never the page, with a fade on the edge that has more
     columns; order manifest columns by importance. List filters are a row from `md` and a bottom sheet below it.

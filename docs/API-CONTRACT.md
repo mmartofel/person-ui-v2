@@ -28,6 +28,18 @@ Examples use a resource `Person` (tag `Persons`, path `/api/persons`). Replace i
 - `{id}` is an integer (`int64`).
 - Request and success response bodies are `application/json` (not `*/*`).
 
+### Status endpoints
+Outside `/api` and outside `contract/openapi.json` (the `contract-auditor` does not check them). The UI's footer polls
+`/actuator/health` every 30 s for the API's status and reads `/actuator/info` for its running version whenever the API
+becomes reachable; both are public, without a token.
+- `GET /actuator/health`: `{"status": "UP"}` when the API works, another status (`DOWN`, `OUT_OF_SERVICE`) with a
+  non-2xx code when it does not, and `components` with each component's `status` (e.g. `db`) so the UI can say what
+  is down. No `details`: they may hold host names or versions of infrastructure.
+- `GET /actuator/info`: `{"build": {"version": "<the same version as info.version>"}}`.
+- Recommended, not required: without `/actuator/info` the footer shows the contract's version marked "contract";
+  without `/actuator/health` it shows the API as unavailable. A running major version that differs from the
+  contract's is shown as degraded (a breaking change, rule 1).
+
 ## 3. Schemas
 - Separate schemas per direction: `<Resource>Response`, `<Resource>CreateRequest`, `<Resource>UpdateRequest`.
   Entities are never exposed.
@@ -138,6 +150,11 @@ contract or UI fix:
   need `ModelConverters.getInstance(true)` (OpenAPI 3.1), or `"type": "object"` is missing.
 - **Contract version:** `info.version` from Maven `build-info` (`BuildProperties`), bumped with every contract change,
   never hard-coded. The UI regenerates its client from it and CI compares the generated files.
+- **Status endpoints:** Actuator with `management.endpoints.web.exposure.include: health,info` and
+  `management.endpoint.health.show-components: always` (the default `show-details: never` keeps details out);
+  `build-info` fills `/actuator/info` `build.version` by itself. `SecurityConfig` permits `/actuator/health/**` and
+  `/actuator/info` before the `/api/**` rules; only `/actuator/health` being public is a common default that leaves
+  the footer without the running version.
 - **Schema:** Flyway migrations with `spring.jpa.hibernate.ddl-auto: validate`, so an entity that does not match the
   schema fails at startup instead of drifting.
 - **Relations with `open-in-view: false`:** make write endpoints `@Transactional` and map the response inside the
