@@ -205,11 +205,14 @@ deploy/openshift/keycloak-realm.sh   # once per namespace: the realm accepts the
 | `KEYCLOAK_SERVICE`, `KEYCLOAK_DEPLOYMENT` | `keycloak` |
 | `API_SERVICE` | `spring-person-api` (its port is read from the Service) |
 
-In Developer > Topology the UI shows the nginx icon in the `person-app` group, with an arrow to Keycloak and a link to
-its source at the deployed commit (`labels-patch.yaml`; Deployment metadata only; `VERSION` defaults to the image tag). The API stack carries its own `app.openshift.io/runtime` labels from
-the API repo (`spring`, `keycloak` and `postgresql`, all with `app.kubernetes.io/part-of: person-app`; the console has
-no `keycloak` icon, so Keycloak carries the logo in the `app.openshift.io/custom-icon` annotation) and its own arrows:
-Postgres to the API, the API to the UI and to Keycloak.
+In the Topology view (Workloads > Topology) the UI shows the nginx icon in the `person-app` group, with an arrow to
+Keycloak and a link to its source at the deployed commit (`labels-patch.yaml`; Deployment metadata only; `VERSION`
+defaults to the image tag). The API stack carries its own labels from the API repo: runtimes `spring`, `keycloak` and
+`postgresql`, all `app.kubernetes.io/part-of: person-app` (the console has no `keycloak` icon, so Keycloak carries the
+logo in the `app.openshift.io/custom-icon` annotation), and its own arrows: Postgres to the API, the API to the UI and
+to Keycloak.
+
+![Topology view of namespace spring-person-api: the person-app group with PostgreSQL, the Spring API, Keycloak and the UI](docs/screenshots/openshift-topology.png)
 
 `keycloak-realm.sh` is an interim step until the API repo carries these settings
 ([spring-person-api-claude#1](https://github.com/mmartofel/spring-person-api-claude/issues/1)). It changes the
