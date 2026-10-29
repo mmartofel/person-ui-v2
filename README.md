@@ -208,7 +208,7 @@ In Developer > Topology the UI shows the nginx icon in the `person-app` group, w
 (`labels-patch.yaml`; Deployment metadata only). The API stack carries its own `app.openshift.io/runtime` labels from
 the API repo (`spring`, `keycloak` and `postgresql`, all with `app.kubernetes.io/part-of: person-app`; the console has
 no `keycloak` icon, so Keycloak carries the logo in the `app.openshift.io/custom-icon` annotation) and its own arrows:
-Postgres to the API, the API to the UI.
+Postgres to the API, the API to the UI and to Keycloak.
 
 `keycloak-realm.sh` is an interim step until the API repo carries these settings
 ([spring-person-api-claude#1](https://github.com/mmartofel/spring-person-api-claude/issues/1)). It changes the
