@@ -58,3 +58,9 @@ replacements:
       - select: { kind: Deployment, name: person-ui-v2 }
         fieldPaths:
           - metadata.annotations.[app.openshift.io/connects-to]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.VERSION }
+    targets:
+      - select: { kind: Deployment, name: person-ui-v2 }
+        fieldPaths:
+          - metadata.labels.[app.kubernetes.io/version]
+          - metadata.annotations.[app.openshift.io/vcs-ref]

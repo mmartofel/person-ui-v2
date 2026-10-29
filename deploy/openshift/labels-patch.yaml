@@ -1,5 +1,5 @@
-# Developer > Topology: the runtime icon, the application group shared with the API stack, and the arrow to Keycloak
-# (the annotation's value comes from params.env). Deployment metadata only: the selector is immutable.
+# Developer > Topology: the runtime icon, the application group shared with the API stack, the arrow to Keycloak and the
+# source code link (VERSION and CONNECTS_TO come from params.env). Deployment metadata only: the selector is immutable.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,5 +9,8 @@ metadata:
     app.kubernetes.io/name: person-ui-v2
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: person-app
+    app.kubernetes.io/version: VERSION
   annotations:
     app.openshift.io/connects-to: CONNECTS_TO
+    app.openshift.io/vcs-uri: https://github.com/mmartofel/person-ui-v2
+    app.openshift.io/vcs-ref: VERSION

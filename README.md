@@ -200,12 +200,13 @@ deploy/openshift/keycloak-realm.sh   # once per namespace: the realm accepts the
 | `NAMESPACE` | the current `oc project` |
 | `HOST` | `person-ui-v2-<namespace>.<apps domain>`; the domain comes from the cluster's ingress config (`APPS_DOMAIN` when it cannot be read) |
 | `IMAGE` | `quay.io/mmartofe/person-ui-v2:<current commit>`; the script stops when it is not in the registry |
+| `VERSION` | the tag of `IMAGE`; the Deployment's version label and the commit its Topology source link opens |
 | `REALM`, `OIDC_CLIENT_ID` | `person`, `person-ui` |
 | `KEYCLOAK_SERVICE`, `KEYCLOAK_DEPLOYMENT` | `keycloak` |
 | `API_SERVICE` | `spring-person-api` (its port is read from the Service) |
 
-In Developer > Topology the UI shows the nginx icon in the `person-app` group, with an arrow to Keycloak
-(`labels-patch.yaml`; Deployment metadata only). The API stack carries its own `app.openshift.io/runtime` labels from
+In Developer > Topology the UI shows the nginx icon in the `person-app` group, with an arrow to Keycloak and a link to
+its source at the deployed commit (`labels-patch.yaml`; Deployment metadata only; `VERSION` defaults to the image tag). The API stack carries its own `app.openshift.io/runtime` labels from
 the API repo (`spring`, `keycloak` and `postgresql`, all with `app.kubernetes.io/part-of: person-app`; the console has
 no `keycloak` icon, so Keycloak carries the logo in the `app.openshift.io/custom-icon` annotation) and its own arrows:
 Postgres to the API, the API to the UI and to Keycloak.

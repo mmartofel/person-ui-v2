@@ -15,6 +15,8 @@ if [ -z "${HOST:-}" ]; then
   HOST=person-ui-v2-$NAMESPACE.$APPS_DOMAIN
 fi
 IMAGE=${IMAGE:-quay.io/mmartofe/person-ui-v2:$(git rev-parse --short HEAD)}
+# The image tag is the commit it was built from: Topology's version label and source code link.
+VERSION=${VERSION:-${IMAGE##*:}}
 REALM=${REALM:-person}
 OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-person-ui}
 KEYCLOAK_SERVICE=${KEYCLOAK_SERVICE:-keycloak}
@@ -31,6 +33,7 @@ oc image info "$IMAGE" >/dev/null 2>&1 || fail "image $IMAGE not found (build an
 cat > params.env <<EOF
 HOST=$HOST
 IMAGE=$IMAGE
+VERSION=$VERSION
 OIDC_AUTHORITY=https://$HOST/realms/$REALM
 OIDC_CLIENT_ID=$OIDC_CLIENT_ID
 API_UPSTREAM=http://$API_SERVICE:$API_PORT
