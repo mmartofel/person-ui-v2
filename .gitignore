@@ -45,3 +45,7 @@ reports
 # skill-creator eval results and Claude Code worktrees (eval runs)
 .claude/**/*-workspace/
 .claude/worktrees/
+
+# other
+*.tgz
+quay.sh
