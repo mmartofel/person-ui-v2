@@ -1,0 +1,7 @@
+# Keycloak's public Route; its client person-ui must allow https://<UI Route host>/* as a redirect URI.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: person-ui-v2-config
+data:
+  OIDC_AUTHORITY: https://keycloak-spring-person-api.apps.klaudia.k2qxx.azure.redhatworkshops.io/realms/person

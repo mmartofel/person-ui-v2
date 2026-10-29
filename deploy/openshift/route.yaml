@@ -1,0 +1,16 @@
+# TLS ends at the router, so HSTS is set here (the image does not send it, README "Deploy").
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: person-ui-v2
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000
+spec:
+  to:
+    kind: Service
+    name: person-ui-v2
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

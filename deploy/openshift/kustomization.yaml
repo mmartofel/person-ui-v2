@@ -1,0 +1,14 @@
+# OpenShift overlay: the UI next to the Person API in namespace spring-person-api (README "Deploy" > "OpenShift").
+# Image from Quay, served through an edge-TLS Route; /api stays proxied by the UI's nginx (same origin, no CORS).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: spring-person-api
+resources:
+  - ../../k8s
+  - route.yaml
+images:
+  - name: person-ui-v2
+    newName: quay.io/mmartofe/person-ui-v2
+    newTag: fbe1720
+patches:
+  - path: configmap-patch.yaml
