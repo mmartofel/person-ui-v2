@@ -8,6 +8,9 @@ resources:
   - route.yaml
   - keycloak-routes.yaml
 
+patches:
+  - path: labels-patch.yaml
+
 # Feeds the replacements only; never applied.
 configMapGenerator:
   - name: deploy-params
@@ -50,3 +53,8 @@ replacements:
     targets:
       - select: { kind: ConfigMap, name: person-ui-v2-config }
         fieldPaths: [data.API_UPSTREAM]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.CONNECTS_TO }
+    targets:
+      - select: { kind: Deployment, name: person-ui-v2 }
+        fieldPaths:
+          - metadata.annotations.[app.openshift.io/connects-to]

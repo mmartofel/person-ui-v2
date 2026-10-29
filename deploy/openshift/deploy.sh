@@ -27,7 +27,7 @@ done
 API_PORT=$(oc -n "$NAMESPACE" get service "$API_SERVICE" -o jsonpath='{.spec.ports[0].port}')
 oc image info "$IMAGE" >/dev/null 2>&1 || fail "image $IMAGE not found (build and push it first, README \"Deploy\")"
 
-# Read by kustomization.yaml (replacements); git-ignored.
+# Read by kustomization.yaml (replacements); git-ignored. CONNECTS_TO assumes each Deployment is named like its Service.
 cat > params.env <<EOF
 HOST=$HOST
 IMAGE=$IMAGE
@@ -36,6 +36,7 @@ OIDC_CLIENT_ID=$OIDC_CLIENT_ID
 API_UPSTREAM=http://$API_SERVICE:$API_PORT
 REALM_PATH=/realms/$REALM
 KEYCLOAK_SERVICE=$KEYCLOAK_SERVICE
+CONNECTS_TO=[{"apiVersion":"apps/v1","kind":"Deployment","name":"$KEYCLOAK_SERVICE"}]
 EOF
 
 oc apply -n "$NAMESPACE" -k .
