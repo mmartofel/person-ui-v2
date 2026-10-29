@@ -1,0 +1,34 @@
+# Only the public paths of the realm reach Keycloak, on the UI's host: login, token, logout (/realms/<realm>) and the
+# login page's static files (/resources). /admin and other realms have no route, so they fall to the UI.
+# Host, realm path and Keycloak service come from params.env; the Keycloak service's single port is used.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: person-ui-v2-realm
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000
+spec:
+  host: HOST
+  path: REALM_PATH
+  to:
+    kind: Service
+    name: KEYCLOAK_SERVICE
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: person-ui-v2-resources
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000
+spec:
+  host: HOST
+  path: /resources
+  to:
+    kind: Service
+    name: KEYCLOAK_SERVICE
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

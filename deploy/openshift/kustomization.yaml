@@ -1,14 +1,52 @@
-# OpenShift overlay: the UI next to the Person API in namespace spring-person-api (README "Deploy" > "OpenShift").
-# Image from Quay, served through an edge-TLS Route; /api stays proxied by the UI's nginx (same origin, no CORS).
+# OpenShift overlay: the UI next to an API stack (API + Keycloak) in one namespace (README "Deploy" > "OpenShift").
+# No cluster values in here: deploy.sh writes params.env and applies with `oc apply -n <namespace> -k`.
+# One public host: the UI, its /api proxy, and only the realm's public paths of Keycloak (keycloak-routes.yaml).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: spring-person-api
 resources:
   - ../../k8s
   - route.yaml
-images:
-  - name: person-ui-v2
-    newName: quay.io/mmartofe/person-ui-v2
-    newTag: fbe1720
-patches:
-  - path: configmap-patch.yaml
+  - keycloak-routes.yaml
+
+# Feeds the replacements only; never applied.
+configMapGenerator:
+  - name: deploy-params
+    envs:
+      - params.env
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        config.kubernetes.io/local-config: "true"
+
+replacements:
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.HOST }
+    targets:
+      - select: { kind: Route }
+        fieldPaths: [spec.host]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.REALM_PATH }
+    targets:
+      - select: { kind: Route, name: person-ui-v2-realm }
+        fieldPaths: [spec.path]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.KEYCLOAK_SERVICE }
+    targets:
+      - select: { kind: Route, name: person-ui-v2-realm }
+        fieldPaths: [spec.to.name]
+      - select: { kind: Route, name: person-ui-v2-resources }
+        fieldPaths: [spec.to.name]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.IMAGE }
+    targets:
+      - select: { kind: Deployment, name: person-ui-v2 }
+        fieldPaths:
+          - spec.template.spec.containers.[name=person-ui-v2].image
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.OIDC_AUTHORITY }
+    targets:
+      - select: { kind: ConfigMap, name: person-ui-v2-config }
+        fieldPaths: [data.OIDC_AUTHORITY]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.OIDC_CLIENT_ID }
+    targets:
+      - select: { kind: ConfigMap, name: person-ui-v2-config }
+        fieldPaths: [data.OIDC_CLIENT_ID]
+  - source: { kind: ConfigMap, name: deploy-params, fieldPath: data.API_UPSTREAM }
+    targets:
+      - select: { kind: ConfigMap, name: person-ui-v2-config }
+        fieldPaths: [data.API_UPSTREAM]

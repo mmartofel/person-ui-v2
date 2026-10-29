@@ -177,6 +177,42 @@ forwarding the UI to `localhost:5173`. `k8s/ingress.example.yaml` (not applied) 
 API and `/` to the UI. CircleCI builds the image on every push (job `image`) but pushes it nowhere: add a registry
 login and `docker push` there to publish it.
 
+### OpenShift
+`deploy/openshift/` deploys the UI into a namespace that already runs its API stack (API and Keycloak, deployed from
+the API repo). Nothing in it names a cluster or namespace: `deploy.sh` works the values out and writes them to
+`params.env` (git-ignored), which the kustomization copies into the objects. One public host serves:
+- `/`: the UI; `/api` and the two Actuator endpoints are proxied by its nginx, as above.
+- `/realms/<realm>` and `/resources`: Keycloak's login, token and logout endpoints and the login page's files, so
+  the browser stays on one origin and Keycloak needs no host of its own. `/admin` and other realms are not routed;
+  they fall to the UI.
+
+```bash
+source quay.sh && echo "$QUAY_TOKEN" | podman login quay.io -u "$QUAY_USER" --password-stdin
+podman build --platform linux/amd64 -t quay.io/$QUAY_ORG/person-ui-v2:$(git rev-parse --short HEAD) .
+podman push quay.io/$QUAY_ORG/person-ui-v2:$(git rev-parse --short HEAD)
+oc project <namespace>
+deploy/openshift/deploy.sh           # the UI, its Route and the two Keycloak Routes
+deploy/openshift/keycloak-realm.sh   # once per namespace: the realm accepts the UI's host (see below)
+```
+
+| Variable | Default |
+|---|---|
+| `NAMESPACE` | the current `oc project` |
+| `HOST` | `person-ui-v2-<namespace>.<apps domain>`; the domain comes from the cluster's ingress config (`APPS_DOMAIN` when it cannot be read) |
+| `IMAGE` | `quay.io/mmartofe/person-ui-v2:<current commit>`; the script stops when it is not in the registry |
+| `REALM`, `OIDC_CLIENT_ID` | `person`, `person-ui` |
+| `KEYCLOAK_SERVICE`, `KEYCLOAK_DEPLOYMENT` | `keycloak` |
+| `API_SERVICE` | `spring-person-api` (its port is read from the Service) |
+
+`keycloak-realm.sh` is an interim step until the API repo carries these settings
+([spring-person-api-claude#1](https://github.com/mmartofel/spring-person-api-claude/issues/1)). It changes the
+realm ConfigMap that Keycloak imports at start, not its Deployment, and then recreates the Keycloak pod. That logs out
+everyone and loses runtime changes, because `start-dev` keeps its data in the container. It sets two things:
+- the realm's Frontend URL to `https://<host>`, because Keycloak runs without `proxy-headers` and would otherwise
+  build `http://` URLs behind the router;
+- the UI's host in the client's redirect URIs, web origins and post-logout redirects.
+It is idempotent. A `skaffold run` from the API repo undoes it, so run it again after one.
+
 ## Repository
 - `src/components/app/`, `src/manifest/`, `src/auth/`, `src/i18n/`, `src/api/fetcher.ts`: the generic app, driven by
   the manifest. Resources live in `src/features/<resource>/` (none yet; `/` shows "No resources yet").
