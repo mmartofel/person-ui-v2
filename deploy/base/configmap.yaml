@@ -1,0 +1,15 @@
+# Runtime configuration of the UI (README "Deploy"): read by the container at startup, no rebuild per environment.
+# The defaults fit the API stack in the same namespace (Services spring-person-api and keycloak, realm person), so
+# they hold in every cluster; an environment overlay patches them only when its stack differs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: person-ui-v2-config
+data:
+  # The realm on the UI's own host: nginx proxies its public paths to OIDC_UPSTREAM, so no host is configured.
+  OIDC_AUTHORITY: /realms/person
+  OIDC_CLIENT_ID: person-ui
+  OIDC_ROLES_CLAIM: realm_access.roles
+  # Keycloak and the API inside the cluster; nginx proxies to them, paths unchanged.
+  OIDC_UPSTREAM: http://keycloak:8080
+  API_UPSTREAM: http://spring-person-api:8080

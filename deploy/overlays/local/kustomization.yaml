@@ -1,0 +1,6 @@
+# Local cluster (kind, minikube, Docker Desktop), Skaffold's default profile: the base as is. Skaffold forwards the UI
+# to localhost:5173, the redirect the realm accepts in development; the API stack runs from its own repo.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base

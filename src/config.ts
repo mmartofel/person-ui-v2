@@ -22,9 +22,13 @@ function configValue(name: ConfigName): string | undefined {
   return (runtime ? runtime[name] : devValues[name]) || undefined
 }
 
-/** A required setting; the error names the variable to set where the app runs. */
+/**
+ * A required setting; the error names the variable to set where the app runs. An OIDC_AUTHORITY given as a path
+ * (`/realms/orders`) is on the UI's own host, proxied by its nginx (README "Deploy"), and resolves against it.
+ */
 export function requireConfig(name: Exclude<ConfigName, 'OIDC_ROLES_CLAIM'>): string {
   const value = configValue(name)
+  if (value && name === 'OIDC_AUTHORITY' && value.startsWith('/')) return new URL(value, window.location.origin).href
   if (value) return value
   throw new Error(
     window.__APP_CONFIG__

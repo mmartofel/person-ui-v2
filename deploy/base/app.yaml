@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: person-ui-v2
+  labels:
+    app.kubernetes.io/name: person-ui-v2
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: person-app
 spec:
   selector:
     matchLabels:
@@ -58,6 +62,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: person-ui-v2
+  labels:
+    app.kubernetes.io/name: person-ui-v2
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: person-app
 spec:
   selector:
     app: person-ui-v2

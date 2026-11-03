@@ -49,10 +49,12 @@ Ask what is missing; never guess a URL, role or realm.
       colour at least 4.5:1, `ring` at least 3:1 on `background`, `card` and `sidebar`), adjust lightness until it
       passes, and show `/__gallery` in light and dark to the user.
 - [ ] Deployment: replace `crud-ui-blueprint` with the image name in `skaffold.yaml` (`build.artifacts[].image`)
-      and `k8s/app.yaml` (`image`), and with the project name in the other names of `skaffold.yaml`, `k8s/`
-      (Deployment, Service, ConfigMap) and `.circleci/config.yml` (job `image`). `k8s/configmap.yaml`: the OIDC values
-      and `API_UPSTREAM`; `k8s/ingress.example.yaml`: the `/api` backend is the API's Service (not `my-api`). Check:
-      `docker build` (or podman) and `kubectl kustomize k8s`.
+      and `deploy/base/app.yaml` (`image`), and with the project name in the other names of `skaffold.yaml`, `deploy/`
+      (Deployment, Service, ConfigMap, Route, Ingress, labels) and `.circleci/config.yml` (job `image`).
+      `deploy/base/configmap.yaml`: `OIDC_AUTHORITY` as the realm path, `OIDC_CLIENT_ID`, `OIDC_UPSTREAM` and
+      `API_UPSTREAM` (the API stack's Service names); the Topology arrows in
+      `deploy/overlays/openshift/topology-ui.yaml` (docs/DEPLOY-CONVENTION.md). Check: `docker build` (or podman)
+      and `kubectl kustomize deploy/overlays/<x>` for each overlay.
 - [ ] `.env.local` from `.env.example`: `VITE_OIDC_*` (with the roles claim), `API_PROXY_TARGET`, `CONTRACT_SOURCE`,
       `E2E_*`.
 - [ ] `common.roles.<role>` labels in every `src/locales/<lang>/common.json`.

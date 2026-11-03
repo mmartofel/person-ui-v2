@@ -1,0 +1,8 @@
+# Kubernetes with an Ingress controller, any cluster and namespace: the base and an Ingress for the UI's host. The
+# realm's login pages are on that same host through the UI's nginx. Host, TLS and ingress class belong to an
+# environment overlay (deploy/environments/example); without one the Ingress answers on any host.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - ingress.yaml

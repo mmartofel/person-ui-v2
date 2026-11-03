@@ -1,0 +1,14 @@
+# Developer > Topology: the runtime icon, the arrows to what the UI calls (each repo declares only its own outgoing
+# arrows, docs/DEPLOY-CONVENTION.md) and the source code link. Deployment metadata only: the selector is immutable.
+# The version label comes from `skaffold run --label app.kubernetes.io/version=<commit>` (README "Deploy").
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: person-ui-v2
+  labels:
+    app.openshift.io/runtime: nginx
+  annotations:
+    app.openshift.io/connects-to: >-
+      [{"apiVersion":"apps/v1","kind":"Deployment","name":"spring-person-api"},
+      {"apiVersion":"apps/v1","kind":"Deployment","name":"keycloak"}]
+    app.openshift.io/vcs-uri: https://github.com/mmartofel/person-ui-v2

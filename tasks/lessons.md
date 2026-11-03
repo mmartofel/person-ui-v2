@@ -24,3 +24,9 @@ Patterns learned from user corrections. Review at session start; add a rule afte
   also set the annotation `app.openshift.io/custom-icon` to the Keycloak logo as a `data:image/svg+xml;base64,` URL
   (the console takes any URL there before the runtime label). Check a runtime value against the console's icon list
   (`catalog-item-icon.tsx`) before proposing it.
+
+## Deploying the API and the UI
+- **Mistake:** added `skaffold.stack.yaml`, which pulled the API repo in from a sibling checkout, and planned Secrets
+  that had to be created by hand before the API's deploy.
+- **Rule:** each repo installs itself with one `skaffold run` line, API first, into one namespace of any name; no
+  umbrella config and no step before `skaffold run` (Secrets come from the API's before-deploy hook).

@@ -26,6 +26,15 @@ test('the runtime config of the image wins over the build-time values', async ()
   expect(rolesClaim()).toBe('roles')
 })
 
+test('an authority given as a path is on the UI host', async () => {
+  window.__APP_CONFIG__ = { OIDC_AUTHORITY: '/realms/prod' }
+  vi.resetModules()
+
+  const { requireConfig } = await import('./config')
+
+  expect(requireConfig('OIDC_AUTHORITY')).toBe(`${window.location.origin}/realms/prod`)
+})
+
 test('a missing runtime value names the container variable, not the .env.local one', async () => {
   vi.stubEnv('VITE_OIDC_CLIENT_ID', 'dev-ui')
   window.__APP_CONFIG__ = { OIDC_AUTHORITY: 'https://sso.example.com/realms/prod', OIDC_CLIENT_ID: '' }

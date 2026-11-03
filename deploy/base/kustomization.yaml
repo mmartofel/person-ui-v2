@@ -1,0 +1,7 @@
+# The UI on plain Kubernetes, valid in any cluster and namespace (docs/DEPLOY-CONVENTION.md). No host, registry,
+# namespace or secret in here: those come from an overlay (deploy/overlays/<target>) or Skaffold flags.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - configmap.yaml
+  - app.yaml

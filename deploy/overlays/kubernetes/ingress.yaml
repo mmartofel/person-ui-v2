@@ -1,0 +1,21 @@
+# Everything goes to the UI's nginx, which proxies /api, the two Actuator paths and the realm's public paths itself.
+# Strict-Transport-Security belongs here when TLS ends at the Ingress (an annotation of your controller).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: person-ui-v2
+  labels:
+    app.kubernetes.io/name: person-ui-v2
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: person-app
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: person-ui-v2
+                port:
+                  number: 8080

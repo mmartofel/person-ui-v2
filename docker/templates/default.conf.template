@@ -1,5 +1,13 @@
-# The UI: static files of the Vite build, SPA fallback, and /api proxied to the API (same origin, no CORS).
+# The UI: static files of the Vite build, SPA fallback, /api proxied to the API (same origin, no CORS) and, with
+# OIDC_UPSTREAM, the realm's public paths proxied to Keycloak (oidc-proxy.inc, written by 10-ui-runtime-config.envsh).
 # Rendered at container start by the nginx image (envsubst of ${API_UPSTREAM} and ${OIDC_ORIGIN} only, see Dockerfile).
+
+# The scheme the browser used: the one the router or Ingress forwards when TLS ends there, else nginx's own.
+map $http_x_forwarded_proto $forwarded_proto {
+    default $http_x_forwarded_proto;
+    ""      $scheme;
+}
+
 server {
     listen 8080;
     server_name _;
@@ -10,7 +18,8 @@ server {
     gzip_vary on;
     gzip_types text/css text/javascript application/javascript application/json image/svg+xml;
 
-    include /etc/nginx/conf.d/security-headers.inc;
+    # Each location includes the security headers itself, except Keycloak's, which keep their own.
+    include /etc/nginx/conf.d/oidc-proxy.inc;
 
     # Routes of the app: index.html, revalidated on every load so a new release is picked up.
     location / {
@@ -41,8 +50,9 @@ server {
         proxy_hide_header X-Content-Type-Options;
         proxy_hide_header Referrer-Policy;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_set_header X-Forwarded-Host $host;
+        include /etc/nginx/conf.d/security-headers.inc;
     }
 
     # The two public Actuator endpoints of the footer's API status (docs/API-CONTRACT.md "Status endpoints"); no
@@ -61,6 +71,7 @@ server {
     location = /healthz {
         access_log off;
         default_type text/plain;
+        include /etc/nginx/conf.d/security-headers.inc;
         return 200 "ok\n";
     }
 }

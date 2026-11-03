@@ -13,7 +13,7 @@ if [ -n "$missing" ]; then
   exit 1
 fi
 # The image only logs an error when it cannot render the templates, then starts nginx without the server: fail instead.
-# With a read-only root filesystem, mount writable volumes on /etc/nginx/conf.d and /tmp (k8s/app.yaml).
+# With a read-only root filesystem, mount writable volumes on /etc/nginx/conf.d and /tmp (deploy/base/app.yaml).
 for dir in /etc/nginx/conf.d /tmp; do
   if [ ! -w "$dir" ]; then
     echo "UI configuration: $dir is not writable for user $(id -u) (mount a writable volume there)" >&2
@@ -21,28 +21,69 @@ for dir in /etc/nginx/conf.d /tmp; do
   fi
 done
 
-# The authority's origin (scheme://host[:port]) for the CSP connect-src; checked so it cannot break the header.
-OIDC_ORIGIN=$(printf '%s' "$OIDC_AUTHORITY" | sed -E 's#^(https?://[^/]+).*#\1#')
-case "$OIDC_ORIGIN" in
-  http://*[!A-Za-z0-9.:/-]* | https://*[!A-Za-z0-9.:/-]*) bad=1 ;;
+# OIDC_AUTHORITY is the realm's public URL, or only its path (/realms/<realm>) when Keycloak is served on the UI's own
+# host through OIDC_UPSTREAM below. Checked so it cannot break the CSP header or the nginx config.
+case "$OIDC_AUTHORITY" in
+  *[!A-Za-z0-9._~:/-]*) bad=1 ;;
   http://?* | https://?*) bad= ;;
+  /?*) bad= ;;
   *) bad=1 ;;
 esac
+case "$OIDC_AUTHORITY" in *..*) bad=1 ;; esac
 if [ -n "$bad" ]; then
-  echo "UI configuration: OIDC_AUTHORITY must be an http(s) URL, got: $OIDC_AUTHORITY" >&2
+  echo "UI configuration: OIDC_AUTHORITY must be an http(s) URL or a path such as /realms/<realm>, got: $OIDC_AUTHORITY" >&2
   exit 1
 fi
+# The authority's origin (scheme://host[:port]) for the CSP connect-src; empty for a path ('self' covers it).
+OIDC_ORIGIN=$(printf '%s' "$OIDC_AUTHORITY" | sed -nE 's#^(https?://[^/]+).*#\1#p')
 export OIDC_ORIGIN
-
-# proxy_pass with a path would replace /api/ in the forwarded URL, so only scheme://host[:port] is accepted.
-case "$API_UPSTREAM" in
-  http://*/* | https://*/*) bad=1 ;;
-  http://?* | https://?*) bad= ;;
-  *) bad=1 ;;
-esac
-if [ -n "$bad" ]; then
-  echo "UI configuration: API_UPSTREAM must be scheme://host[:port] without a path, got: $API_UPSTREAM" >&2
+OIDC_REALM_PATH=$(printf '%s' "$OIDC_AUTHORITY" | sed -E 's#^https?://[^/]+##; s#/+$##')
+if [ -n "${OIDC_UPSTREAM:-}" ] && [ -z "$OIDC_REALM_PATH" ]; then
+  echo "UI configuration: OIDC_AUTHORITY has no realm path (/realms/<realm>) to proxy to OIDC_UPSTREAM: $OIDC_AUTHORITY" >&2
   exit 1
+fi
+if [ -z "$OIDC_ORIGIN" ] && [ -z "${OIDC_UPSTREAM:-}" ]; then
+  echo "UI configuration: OIDC_AUTHORITY is a path ($OIDC_AUTHORITY), so OIDC_UPSTREAM must name the Keycloak to proxy it to" >&2
+  exit 1
+fi
+
+# proxy_pass with a path would replace the location's prefix in the forwarded URL, so only scheme://host[:port].
+for name in API_UPSTREAM OIDC_UPSTREAM; do
+  eval "value=\${$name:-}"
+  [ -n "$value" ] || continue
+  case "$value" in
+    *[!A-Za-z0-9.:/-]*) bad=1 ;;
+    http://*/* | https://*/*) bad=1 ;;
+    http://?* | https://?*) bad= ;;
+    *) bad=1 ;;
+  esac
+  if [ -n "$bad" ]; then
+    echo "UI configuration: $name must be scheme://host[:port] without a path, got: $value" >&2
+    exit 1
+  fi
+done
+
+# With OIDC_UPSTREAM, the realm's public paths are served on the UI's host: the login, token and logout endpoints
+# (only this realm, so the master realm is never reachable) and the login pages' static files. Keycloak builds its URLs
+# from the forwarded headers (it runs with proxy-headers xforwarded and no fixed hostname), so no host is configured
+# anywhere. Its own security headers pass through: the UI's CSP would block the login page's scripts.
+proxy_inc=/etc/nginx/conf.d/oidc-proxy.inc
+: > "$proxy_inc"
+if [ -n "${OIDC_UPSTREAM:-}" ]; then
+  for location in "$OIDC_REALM_PATH/" /resources/; do
+    cat >> "$proxy_inc" <<LOCATION
+location ^~ $location {
+    proxy_pass $OIDC_UPSTREAM;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Forwarded-Host \$http_host;
+    proxy_set_header X-Forwarded-Proto \$forwarded_proto;
+    proxy_set_header X-Forwarded-Port \$http_x_forwarded_port;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_buffer_size 16k;
+    proxy_buffers 8 16k;
+}
+LOCATION
+  done
 fi
 
 # One-line values only: config.js holds them as JavaScript strings.
@@ -65,4 +106,4 @@ window.__APP_CONFIG__ = {
   OIDC_ROLES_CLAIM: $(json "${OIDC_ROLES_CLAIM:-}"),
 }
 CONFIG
-echo "UI configuration: OIDC $OIDC_AUTHORITY (client $OIDC_CLIENT_ID), /api -> $API_UPSTREAM"
+echo "UI configuration: OIDC $OIDC_AUTHORITY (client $OIDC_CLIENT_ID), /api -> $API_UPSTREAM${OIDC_UPSTREAM:+, $OIDC_REALM_PATH/ and /resources/ -> $OIDC_UPSTREAM}"

@@ -1,0 +1,26 @@
+# An environment overlay: copy this folder to deploy/environments/<env>/ (git-ignored, except this example) and deploy
+# with DEPLOY_OVERLAY=deploy/environments/<env> skaffold run -p <target> (README "Deploy"). It starts from a target
+# overlay and changes only what this environment needs; everything not patched keeps the overlay's values.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../overlays/kubernetes        # or ../../overlays/openshift
+patches:
+  # A host of your own, with TLS (Kubernetes). On OpenShift patch the Route's spec.host instead, or keep the generated one.
+  - target: { kind: Ingress, name: person-ui-v2 }
+    patch: |-
+      - op: add
+        path: /spec/ingressClassName
+        value: nginx
+      - op: add
+        path: /spec/tls
+        value: [{ hosts: [ui.example.com], secretName: ui-example-com-tls }]
+      - op: add
+        path: /spec/rules/0/host
+        value: ui.example.com
+  # A stack named differently from the defaults in deploy/base/configmap.yaml.
+  - target: { kind: ConfigMap, name: person-ui-v2-config }
+    patch: |-
+      - op: replace
+        path: /data/API_UPSTREAM
+        value: http://spring-person-api:8080
