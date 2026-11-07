@@ -26,7 +26,11 @@ this API's OpenAPI contract, so the contract rules in `docs/API-CONTRACT.md` are
 
 ## Stack and project rules
 - Java 21, the latest Spring Boot 4.x, Maven. No Lombok; constructor injection.
-- PostgreSQL and Keycloak run with Docker Compose (`docker-compose.yml`); Kubernetes manifests in `k8s/`.
+- PostgreSQL and Keycloak run with Docker Compose (`docker-compose.yml`) locally. Clusters (Kubernetes, OpenShift)
+  deploy with Skaffold and kustomize from `deploy/`, as `docs/DEPLOY-CONVENTION.md` says (a copy from the UI template;
+  keep it identical to the UI repo's copy and change both in the same session). Nothing in git names a cluster, host,
+  registry or namespace, and no secret value is in the manifests: the Skaffold before-deploy hook
+  `deploy/ensure-secrets.sh` creates the missing Secrets.
 - Maven `artifactId` = the repository directory name; `groupId` and base package from the Project section.
 - Semantic versioning from `1.0.0`: PATCH by default, MINOR for a backward-compatible feature, MAJOR for a breaking
   API change. Every contract change bumps the version.
@@ -105,16 +109,25 @@ this API's OpenAPI contract, so the contract rules in `docs/API-CONTRACT.md` are
 
 ## Keycloak
 The UI logs in against this realm, so its shape is fixed:
-- One realm file, `k8s/realm.json`, imported with `--import-realm` by Docker Compose (Keycloak `start-dev`) and by
-  Kubernetes (a `configMapGenerator`, so a changed file rolls a new pod).
+- One realm file, `deploy/base/realm.json`, imported with `--import-realm` by Docker Compose (Keycloak `start-dev`)
+  and by Kubernetes (a `configMapGenerator`, so a changed file rolls a new pod). It holds no host and no secret value:
+  the client secret and the demo passwords are `${ENV}` placeholders, with fixed demo values in `docker-compose.yml`
+  and Secrets in a cluster.
+- Keycloak runs with `KC_PROXY_HEADERS=xforwarded` and no `KC_HOSTNAME`: in a cluster the browser reaches it only
+  through the UI's nginx, on the UI's host (`docs/DEPLOY-CONVENTION.md` section 6), and it builds every URL, the token
+  issuer included, from that host. It gets no Route or Ingress of its own; the master realm and `/admin` stay private.
 - Realm roles `<realm>-viewer` and `<realm>-editor`, read from the `realm_access.roles` claim and mapped to
   `ROLE_<role>` in `SecurityConfig` (resource server, `jwk-set-uri` from `JWK_SET_URI`).
-- Client `<realm>-ui`: public, standard flow only, PKCE `S256`, redirect URI `http://localhost:5173/*`, web origin
-  `http://localhost:5173`.
-- Client `<realm>-api`: confidential, service account with `<realm>-editor`, secret `<realm>-api-secret` (dev only),
-  for `client_credentials` smoke tests.
-- Demo users (password = username): `viewer` with `<realm>-viewer`, `editor` with `<realm>-editor`. The UI's e2e tests
-  log in as them.
+- Client `<realm>-ui`: public, standard flow only, PKCE `S256`, `rootUrl` `${authBaseUrl}`, redirect URIs `/*` and
+  `http://localhost:5173/*`, post-logout redirect URIs `/*##http://localhost:5173/*`, web origins `+`. The relative
+  URIs resolve to the host the request came through, so sign-in works on any generated Route host with no realm
+  change, and a foreign host is rejected.
+- Client `<realm>-api`: confidential, service account with `<realm>-editor`, for `client_credentials` smoke tests.
+  Its secret is a placeholder: a fixed demo value in Docker Compose, a random one in the cluster Secret
+  `<project>-oidc-client` (key `client-secret`).
+- Demo users (password = username by default, also on clusters; `DEMO_VIEWER_PASSWORD` / `DEMO_EDITOR_PASSWORD`
+  override it on the first deploy of a publicly reachable cluster): `viewer` with `<realm>-viewer`, `editor` with
+  `<realm>-editor`. The UI's e2e tests log in as them.
 - Internationalization on: `en` (default) and `pl`; the login page follows `ui_locales` from the UI.
 - `--import-realm` skips an existing realm: after changing `realm.json` run
   `docker compose up -d --force-recreate keycloak`.
@@ -158,7 +171,7 @@ The UI logs in against this realm, so its shape is fixed:
 - Smoke-test the local API with a `client_credentials` token from `<realm>-api` (`curl` commands in README, "Run
   locally"), and delete the smoke data afterwards.
 - After a version bump, rebuild and restart the locally running API (`nohup java -jar target/<project>-<version>.jar &`,
-  after `pkill -f <project>-`), and recreate Keycloak if `k8s/realm.json` changed.
+  after `pkill -f <project>-`), and recreate Keycloak if `deploy/base/realm.json` changed.
 - Commit only when asked, and push only when asked; "commit" alone does not mean push. Before committing, scan the
   changed files for Polish text.
 - After a push, check CI: `gh api repos/<owner>/<repo>/commits/<sha>/status` (context `ci/circleci: build`; logs at the

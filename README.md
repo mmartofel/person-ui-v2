@@ -11,7 +11,7 @@ Hook Form + Zod, orval, i18next, Vitest + Testing Library, Playwright.
 ## Prerequisites
 - Node.js 24+ and npm 11+, [Claude Code](https://claude.com/claude-code), the GitHub CLI (`gh`).
 - An API whose contract passes the `contract-auditor` (rules in `docs/API-CONTRACT.md`). A new Spring Boot API
-  starts from `docs/API-KICKSTART.md`: two files to copy and one prompt.
+  starts from `docs/API-KICKSTART.md`: three files to copy and one prompt.
 - An OIDC provider with a public client: Authorization Code + PKCE, redirect URI `http://localhost:5173/*`, one read
   role and one write role in an access token claim (`VITE_OIDC_ROLES_CLAIM`, default Keycloak's `realm_access.roles`),
   and two users for the e2e tests. Tested with Keycloak; the e2e login helper fills Keycloak's login form, so another
@@ -67,6 +67,7 @@ No API yet? Start a Spring Boot API that already follows the contract, from an e
 mkdir library-api && cd library-api && git init
 mkdir docs
 cp ../crud-ui-blueprint/docs/API-CONTRACT.md docs/API-CONTRACT.md   # the rules, never edited in the API repo
+cp ../crud-ui-blueprint/docs/DEPLOY-CONVENTION.md docs/             # deployment rules, the same in both repos
 cp ../crud-ui-blueprint/docs/API-CLAUDE.md CLAUDE.md                # the API's CLAUDE.md template, as is
 claude                                                              # paste the prompt from docs/API-KICKSTART.md
 ```
@@ -76,7 +77,7 @@ claude                                                              # paste the 
 2. Paste the prompt from `docs/API-KICKSTART.md` and replace its last paragraph with your domain (resources, fields,
    relations, filters).
 3. Answer its one round of questions (groupId, realm, field details) and approve the plan. It builds the skeleton
-   (Maven, Docker Compose with PostgreSQL and Keycloak, `k8s/realm.json`, CircleCI), the shared classes modelled on
+   (Maven, Docker Compose with PostgreSQL and Keycloak, `deploy/` with Skaffold, CircleCI), the shared classes modelled on
    [`spring-person-api-claude`](https://github.com/mmartofel/spring-person-api-claude), and then each resource with
    tests, and exports `contract/openapi.json`.
 4. It finishes when `mvn clean verify` passes, the API was smoke-tested, and the README has a "Connect a UI" section

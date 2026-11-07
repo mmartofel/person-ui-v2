@@ -41,3 +41,5 @@ read it first. This skill runs in a project, never in the blueprint itself (no `
 - [ ] Summary for the user: versions, CHANGELOG highlights, conflicts and how each was resolved, migrations done,
       open points.
 - [ ] Commit only when asked, everything in one commit: `Upgrade blueprint to vX.Y.Z`.
+      The script stages its changes, so another commit made before it (e.g. a contract pull) takes only its own
+      paths: check `git diff --cached --name-only` and commit with `git commit -- <paths>`.

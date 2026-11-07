@@ -6,13 +6,16 @@ values `crud-ui-init` asks for.
 
 The reference API is [`spring-person-api-claude`](https://github.com/mmartofel/spring-person-api-claude) (Person and
 Task, Person API 3.4.1, commit `f98300e`): the infrastructure classes below are copied from it, so a new API does not
-re-learn its pitfalls (`docs/API-CONTRACT.md` section 10).
+re-learn its pitfalls (`docs/API-CONTRACT.md` section 10). Its `deploy/` folder and `skaffold.yaml` at Person API 3.6.1
+(commit `6a795fe`) are the model for the deployment (`docs/DEPLOY-CONVENTION.md`).
 
 ## Steps
 1. Create the repository: `mkdir <project> && cd <project> && git init`. The directory name becomes the Maven
    `artifactId`.
-2. Copy two files from this template:
+2. Copy three files from this template:
    - `docs/API-CONTRACT.md` → `docs/API-CONTRACT.md` (the rules; never edited in the API repo),
+   - `docs/DEPLOY-CONVENTION.md` → `docs/DEPLOY-CONVENTION.md` (deployment rules shared with the UI repo; changed in
+     both repos together),
    - `docs/API-CLAUDE.md` → `CLAUDE.md` (as is; the first session fills in its Project section).
 3. Make the `spring-boot-template` plugin available to Claude Code (its skills and agents are named in `CLAUDE.md`;
    install commands in this template's README, "Recommended Claude Code plugins").
@@ -36,8 +39,11 @@ rules are requirements, because a web UI is generated from our OpenAPI contract)
 2. Fill in the Project section of CLAUDE.md and remove its template comment.
 3. In plan mode, plan and then build in this order, one commit-sized step at a time:
    a. Skeleton: pom.xml (Java 21, latest Spring Boot 4.x, version 1.0.0, build-info, actuator), docker-compose.yml (PostgreSQL,
-      Keycloak), k8s/ (app, postgres, keycloak, kustomization with a realm configMapGenerator), k8s/realm.json as
-      described in CLAUDE.md "Keycloak", application.yml (with the status endpoints of CLAUDE.md), .circleci/config.yml (mvn -B verify, then fail if
+      Keycloak), deploy/ as docs/DEPLOY-CONVENTION.md lays it out (base: app, postgres, keycloak, configmap,
+      kustomization with a realm configMapGenerator; overlays local, openshift, kubernetes; environments/example;
+      ensure-secrets.sh), deploy/base/realm.json as described in CLAUDE.md "Keycloak", skaffold.yaml (Jib, gitCommit
+      tags, the ensure-secrets before hook, profiles openshift and kubernetes; modelled on the reference API at commit
+      6a795fe), application.yml (with the status endpoints of CLAUDE.md), .circleci/config.yml (mvn -B verify, then fail if
       contract/ has uncommitted changes), .gitignore, tasks/lessons.md.
    b. Shared infrastructure, modelled on the reference API https://github.com/mmartofel/spring-person-api-claude
       (commit f98300e, package pl.piomin.services): config/SecurityConfig, config/OpenApiConfig (problem responses

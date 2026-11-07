@@ -12,5 +12,7 @@ reports
 e2e/.auth
 .playwright-mcp
 .claude/settings.local.json
-# Registry credentials (never in an image layer)
+# Local registry logins (never in an image layer)
+registry-login.sh
 quay.sh
+*.tgz

@@ -164,3 +164,7 @@ contract or UI fix:
   exception message.
 - **Required response fields:** `@Schema(requiredMode = REQUIRED)` on always-present response fields, and
   `springdoc.default-produces-media-type: application/json`, or the generated types are all optional and `*/*`.
+- **Sign-in on a cluster:** a realm with fixed hosts (`KC_HOSTNAME`, absolute redirect URIs) breaks sign-in as soon
+  as the Route or Ingress gets a generated host. Keycloak runs with `KC_PROXY_HEADERS=xforwarded` and no hostname,
+  and the UI client has `rootUrl ${authBaseUrl}` with relative redirect URIs; the UI's nginx serves the realm's public
+  paths on its own host (`docs/DEPLOY-CONVENTION.md` section 6).

@@ -46,8 +46,9 @@ reports
 .claude/**/*-workspace/
 .claude/worktrees/
 
-# other
+# Local registry logins and packed tarballs (never committed; .dockerignore keeps the login out of the image too)
 *.tgz
+registry-login.sh
 quay.sh
 
 # environment overlays hold one environment's hosts and secrets (docs/DEPLOY-CONVENTION.md); only the example is kept

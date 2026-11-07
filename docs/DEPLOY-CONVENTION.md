@@ -75,6 +75,8 @@ names in section 3.
 - `app.openshift.io/connects-to` is an arrow **from the caller to what it calls**. Each repo declares only the arrows
   of its own Deployments: the UI → `<api>` and `keycloak`; the API → `postgres` and `keycloak`.
 - Keycloak has no console icon: it carries the logo in the `app.openshift.io/custom-icon` annotation.
+- A runtime value not listed here is checked against the console's icon list (`catalog-item-icon.tsx`) before use;
+  an unknown value shows a generic icon, with no error.
 
 ## 5. Configuration and secrets
 - Runtime settings live in a ConfigMap in `base`, with defaults that hold inside any cluster (Service names, not

@@ -11,7 +11,7 @@
 
     list:
       defaultSort: dueDate,asc
-      pageSize: 20
+      pageSize: 10
       pageSizes: [10, 20, 50]
       columns:
         - { field: title,    sortable: true }

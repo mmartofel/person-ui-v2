@@ -101,12 +101,14 @@ In dev, Vite proxies `/api` to `API_PROXY_TARGET`.
 
 ## Starting a new API (kickstart)
 A new Spring Boot API for this UI starts from `docs/API-KICKSTART.md`; never hand an API team a partial block.
-- The API repo gets exactly two files from here, copied unchanged: `docs/API-CONTRACT.md` and `docs/API-CLAUDE.md`
-  (as its `CLAUDE.md`). Then the prompt in `docs/API-KICKSTART.md` is pasted into its first session; that session
+- The API repo gets exactly three files from here, copied unchanged: `docs/API-CONTRACT.md`,
+  `docs/DEPLOY-CONVENTION.md` and `docs/API-CLAUDE.md` (as its `CLAUDE.md`). Then the prompt in `docs/API-KICKSTART.md` is pasted into its first session; that session
   fills the template's Project section itself.
 - Keycloak is fixed, not configurable: realm `<realm>`, realm roles `<realm>-viewer` / `<realm>-editor` in
-  `realm_access.roles`, public client `<realm>-ui` (PKCE S256, redirect `http://localhost:5173/*`), service account
-  client `<realm>-api`, users `viewer` / `editor`, i18n `en` + `pl`; Keycloak 8080, API 8081, PostgreSQL 5432.
+  `realm_access.roles`, public client `<realm>-ui` (PKCE S256, `rootUrl ${authBaseUrl}`, redirect and post-logout
+  `/*` plus `http://localhost:5173/*`, web origins `+`), service account client `<realm>-api`, users `viewer` /
+  `editor`, i18n `en` + `pl`; Keycloak 8080 (`KC_PROXY_HEADERS=xforwarded`, no `KC_HOSTNAME`), API 8081,
+  PostgreSQL 5432.
 - The kickstart ends with a README "Connect a UI" section holding the `.env.local` lines; `crud-ui-init` reads it
   instead of asking. Keep that list in step with `.env.example` when a variable is added.
 - The three API docs move together: a new contract rule goes into `docs/API-CONTRACT.md` and, when it changes how a
@@ -115,7 +117,8 @@ A new Spring Boot API for this UI starts from `docs/API-KICKSTART.md`; never han
   `docs/API-CONTRACT.md` section 10 and `docs/API-CLAUDE.md` in the same session.
 - `docs/API-CLAUDE.md` stays generic: placeholders (`<project>`, `<groupId>`, `<realm>`, `<Resource>`) and the
   Order/Customer examples only; no names from the reference API except in `docs/API-KICKSTART.md`, which pins it
-  (`spring-person-api-claude`, commit `f98300e`) as the model for the shared classes.
+  (`spring-person-api-claude`, commit `f98300e`) as the model for the shared classes, and commit `6a795fe` (3.6.1)
+  for `deploy/`.
 
 ## Production image
 - One image for every environment: configuration that differs per environment is read at container start
