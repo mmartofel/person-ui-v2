@@ -237,38 +237,39 @@ test.describe('persons as writer', () => {
     test.skip(isMobile, 'sorts with the table headers, shown from md')
     const tag = `Pag${unique()}`
     await openAs(page, '/persons')
-    for (let i = 0; i <= 10; i++) await createViaApi(page, `P${String(i).padStart(2, '0')}`, tag)
+    // One more than a non-default page size, so a second page exists (the default size is left out of the URL).
+    for (let i = 0; i <= 20; i++) await createViaApi(page, `P${String(i).padStart(2, '0')}`, tag)
     const firstRow = page.getByRole('table').getByRole('row').nth(1)
 
     await page.getByRole('searchbox').fill(tag)
     await expectListParams(page, { q: tag })
     await page.getByLabel('Rows per page').click()
-    await page.getByRole('option', { name: '10', exact: true }).click()
-    await expectListParams(page, { q: tag, size: '10' })
-    await expect(page.getByText('1–10 of 11')).toBeVisible()
+    await page.getByRole('option', { name: '20', exact: true }).click()
+    await expectListParams(page, { q: tag, size: '20' })
+    await expect(page.getByText('1–20 of 21')).toBeVisible()
 
     await page.getByRole('button', { name: 'First name' }).click()
     // The second click toggles the rendered sort: wait for the first one to render.
     await expect(page.getByRole('columnheader', { name: /First name/ })).toHaveAttribute('aria-sort', 'ascending')
     await page.getByRole('button', { name: 'First name' }).click()
-    await expectListParams(page, { q: tag, size: '10', sort: 'firstName,desc' })
-    await expect(firstRow).toContainText('P10')
+    await expectListParams(page, { q: tag, size: '20', sort: 'firstName,desc' })
+    await expect(firstRow).toContainText('P20')
 
     await page.getByRole('button', { name: 'Next page' }).click()
-    await expectListParams(page, { q: tag, size: '10', sort: 'firstName,desc', page: '1' })
+    await expectListParams(page, { q: tag, size: '20', sort: 'firstName,desc', page: '1' })
     await expect(firstRow).toContainText('P00')
 
     // The state survives a reload and Back returns to the previous page.
     await page.reload()
     await expect(firstRow).toContainText('P00')
     await page.goBack()
-    await expectListParams(page, { q: tag, size: '10', sort: 'firstName,desc' })
-    await expect(firstRow).toContainText('P10')
+    await expectListParams(page, { q: tag, size: '20', sort: 'firstName,desc' })
+    await expect(firstRow).toContainText('P20')
 
     // A page past the end (an old link) moves to the last page.
-    await page.goto(`/persons?q=${tag}&size=10&page=99`)
-    await expectListParams(page, { q: tag, size: '10', page: '1' })
-    await expect(page.getByText('11–11 of 11')).toBeVisible()
+    await page.goto(`/persons?q=${tag}&size=20&page=99`)
+    await expectListParams(page, { q: tag, size: '20', page: '1' })
+    await expect(page.getByText('21–21 of 21')).toBeVisible()
   })
 
   test('status, availability and address are saved and shown as a badge and an address block', async ({ page }) => {
