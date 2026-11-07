@@ -16,7 +16,9 @@ read it first. This skill runs in a project, never in the blueprint itself (no `
 - [ ] Target: the version the user named, else the newest release. Crossing a MAJOR version goes one MAJOR at a time.
 
 ## 2. Apply
-- [ ] `scripts/blueprint-upgrade.sh [version]`. Show the user the CHANGELOG part of the output.
+- [ ] `scripts/blueprint-upgrade.sh [version]`. Show the user the CHANGELOG part of the output and the "Left out"
+      list. For each file in that list that the project already has, compare it with the blueprint's version
+      (`git show refs/blueprint-tags/v<to>:<path>`) as you would a conflict.
 - [ ] **MAJOR upgrade: stop.** List the Migration lines and what each means for this project's resources
       (`ui-manifest.yaml`, `src/features/`), and wait for the user's go-ahead.
 - [ ] Resolve every conflict (`git diff --name-only --diff-filter=U`) by the table in `docs/UPGRADE.md`: generic

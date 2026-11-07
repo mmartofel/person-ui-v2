@@ -46,8 +46,30 @@ git show "$to_ref:CHANGELOG.md" | awk -v from="$from" '
   /^\[[^]]+\]: / { exit }
   show'
 
+pathspec=(. "${excludes[@]/#/:(exclude)}")
+# A file the blueprint deletes or renames away that the project has already removed would make git apply refuse
+# the whole patch. Leave it out. A rename whose target the project already has is left out too, because applying
+# it as a new file would fail the same way. The project's own version stays, and the user compares it by hand.
+tracked() { git ls-files --error-unmatch -- "$1" >/dev/null 2>&1; }
+skipped=()
+while IFS=$'\t' read -r status src dst; do
+  case $status in
+    D) tracked "$src" || skipped+=("$src	already deleted in the project") ;;
+    R*)
+      tracked "$src" && continue
+      skipped+=("$src	already gone in the project (blueprint renamed it to $dst)")
+      tracked "$dst" && skipped+=("$dst	the project already has it: compare with the blueprint's v$to by hand")
+      ;;
+  esac
+done < <(git diff -M --name-status "$from_ref" "$to_ref" -- "${pathspec[@]}")
+for entry in ${skipped[@]+"${skipped[@]}"}; do pathspec+=(":(exclude,literal)${entry%%	*}"); done
+
 patch=$(git rev-parse --git-path blueprint-upgrade.patch)
-git diff --binary "$from_ref" "$to_ref" -- . "${excludes[@]/#/:(exclude)}" > "$patch"
+git diff -M --binary "$from_ref" "$to_ref" -- "${pathspec[@]}" > "$patch"
+if [[ ${#skipped[@]} -gt 0 ]]; then
+  echo "Left out (the project already moved on):"
+  printf '  %s\n' "${skipped[@]/	/: }"
+fi
 echo "Applying $(git apply --numstat "$patch" | wc -l | tr -d ' ') changed files ($patch)"
 # Only conflicts and errors are worth reading; git reports every file.
 set +e

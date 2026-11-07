@@ -19,6 +19,11 @@ fork) and fetches its release tags under `refs/blueprint-tags/`, so they never c
 It then prints the CHANGELOG entries between the two versions, applies the diff to the index and lists the
 conflicts. The patch is kept in `.git/blueprint-upgrade.patch`.
 
+Changes the project has already made are left out of the patch and listed under "Left out", because git would
+refuse the whole patch over them. These are a file the blueprint deletes or renames away that the project has
+already removed, and a rename target the project already has. For that target, compare the project's file with the
+blueprint's new version by hand.
+
 ## After the script
 1. **Read the CHANGELOG output.** A MAJOR version has "Migration" lines: changes the project must make by hand,
    usually in `src/features/` following `.claude/skills/crud-resource/references/examples/`.
