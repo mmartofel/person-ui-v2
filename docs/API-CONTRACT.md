@@ -102,6 +102,8 @@ becomes reachable; both are public, without a token.
 - 401 and 403 are not listed per operation; the security scheme covers them.
 - `Problem.errors` is optional (absent when there are no field errors).
 - `@NotBlank` appears only as `minLength: 1`; a whitespace-only value is rejected by the server with a field error.
+- Optional fields, relation ids included, are not typed nullable (no `"null"` in `type`). The UI leaves a cleared field
+  out of the request, which a `PUT` treats as `null` (section 6).
 
 ## 9. Filters, relations and cross-field rules
 Used by the reference API (Person API 3.4); the auditor checks them when a resource has filters or relations.
@@ -112,8 +114,8 @@ Used by the reference API (Person API 3.4); the auditor checks them when a resou
 - An empty or missing filter means "no filter".
 
 ### Relations
-- Requests reference a related record by id: `<relation>Id` (e.g. `assigneeId`), nullable when the relation is
-  optional.
+- Requests reference a related record by id: `<relation>Id` (e.g. `assigneeId`), not required when the relation is
+  optional. It is cleared like any optional field (section 6).
 - Responses embed a summary of the related record: `<relation>: { id, label }` (both required), where `label` is its
   display name (e.g. `"firstName lastName"`). A list never needs one request per row.
 - An unknown `<relation>Id` on create or update returns 400 with a field error on `<relation>Id`, code `not-found`.

@@ -59,7 +59,8 @@ this API's OpenAPI contract, so the contract rules in `docs/API-CONTRACT.md` are
   `errors` (field = parameter name). `q` escapes the LIKE wildcards `%`, `_` and `\`.
   Example: `GET /api/orders?q=&status=&customerId=`.
 - Relations:
-  - Requests reference a related record by id: `<relation>Id` (e.g. `customerId`), nullable. An unknown id returns 400
+  - Requests reference a related record by id: `<relation>Id` (e.g. `customerId`), optional when the relation is
+    (no nullable type needed: a field left out of a `PUT` is cleared). An unknown id returns 400
     with a field error on `<relation>Id`, code `not-found`.
   - Responses embed a `Reference` summary `{id, label}` (e.g. `customer`), where `label` is the related record's
     display name, so a list never needs one request per row. Load the relation with `@EntityGraph` on the
